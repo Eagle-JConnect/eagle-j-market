@@ -1,0 +1,2 @@
+import {Bird} from 'lucide-react';
+export function Logo({dark=false}:{dark?:boolean}){return <div className="flex items-center gap-2 font-black tracking-tight"><span className="grid h-10 w-10 place-items-center rounded-xl bg-eagle-600 text-white shadow-lg"><Bird size={22}/></span><span className={dark?'text-white':'text-slate-900'}>Eagle-J <span className="text-eagle-600">Market</span></span></div>}

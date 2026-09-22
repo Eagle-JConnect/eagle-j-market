@@ -1,0 +1,5 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root{--bg:#f7faf8;--ink:#10251a;--muted:#607166;--line:#e3ebe6;--green:#16a34a}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif}.container{max-width:1180px;margin:0 auto;padding:0 24px}.glass{background:rgba(255,255,255,.8);backdrop-filter:blur(12px);border:1px solid rgba(227,235,230,.9)}

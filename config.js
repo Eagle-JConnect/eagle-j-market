@@ -1,5 +1,5 @@
 // EAGLE-J MARKET V1
-// Replace these placeholders with your Supabase project values.
-// IMPORTANT: Never put a Supabase service_role key in frontend code.
-export const SUPABASE_URL = "YOUR_SUPABASE_URL";
-export const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+// Supabase frontend configuration.
+// This uses the public/publishable key only. Never put a secret/service_role key here.
+export const SUPABASE_URL = "https://dtojgohoppccwvcjslwb.supabase.co";
+export const SUPABASE_ANON_KEY = "sb_publishable_YZPsyybOArvPhcnOKe6ZWQ_T6i0Palg";

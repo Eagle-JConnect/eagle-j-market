@@ -38,11 +38,11 @@ Open:
 
 Replace:
 
-`YOUR_SUPABASE_URL`
+`https://dtojgohoppccwvcjslwb.supabase.co`
 
 and
 
-`YOUR_SUPABASE_ANON_KEY`
+`your publishable key`
 
 with the Supabase project URL and the public anon key.
 

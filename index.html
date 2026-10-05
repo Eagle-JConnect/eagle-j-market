@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EAGLE-J MARKET - Find It, Promote It, Sell It.">
+  <title>EAGLE-J MARKET</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="index.html"><span>🦅</span> EAGLE-J MARKET</a>
+  <nav>
+    <a href="businesses.html">Businesses</a>
+    <a href="deals.html">Deals</a>
+    <a href="products.html">Products</a>
+    <a href="pricing.html">Pricing</a>
+    <a class="btn btn-small" href="login.html">Login</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <span class="eyebrow">BAHAMAS • LOCAL MARKETPLACE</span>
+      <h1>Find It. Promote It. Sell It.</h1>
+      <p>Discover businesses, products, services and local deals in one place.</p>
+      <form class="search-box" action="businesses.html">
+        <input name="q" placeholder="What are you looking for?" aria-label="Search">
+        <button class="btn" type="submit">Search</button>
+      </form>
+      <div class="hero-actions">
+        <a class="btn" href="businesses.html">Find a Business</a>
+        <a class="btn btn-light" href="register.html?type=business">Promote Your Business</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-heading"><div><span class="eyebrow">EXPLORE</span><h2>Popular Categories</h2></div></div>
+    <div id="categories" class="category-grid">
+      <a class="category-card" href="businesses.html?category=Restaurants">🍔<strong>Restaurants</strong></a>
+      <a class="category-card" href="businesses.html?category=Fashion">👗<strong>Fashion</strong></a>
+      <a class="category-card" href="businesses.html?category=Beauty">💇<strong>Beauty</strong></a>
+      <a class="category-card" href="businesses.html?category=Auto">🚗<strong>Auto</strong></a>
+      <a class="category-card" href="businesses.html?category=Home Services">🔧<strong>Home Services</strong></a>
+      <a class="category-card" href="businesses.html?category=Transportation">🚕<strong>Transportation</strong></a>
+      <a class="category-card" href="businesses.html?category=Electronics">📱<strong>Electronics</strong></a>
+      <a class="category-card" href="businesses.html?category=Hotels">🏨<strong>Hotels</strong></a>
+    </div>
+  </section>
+
+  <section class="section muted">
+    <div class="section-heading"><div><span class="eyebrow">HOT RIGHT NOW</span><h2>Today's Deals</h2></div><a href="deals.html">View all →</a></div>
+    <div id="homeDeals" class="card-grid"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-heading"><div><span class="eyebrow">DISCOVER</span><h2>Featured Businesses</h2></div><a href="businesses.html">View all →</a></div>
+    <div id="featuredBusinesses" class="card-grid"></div>
+  </section>
+
+  <section class="cta">
+    <div><span class="eyebrow">FOR BUSINESS OWNERS</span><h2>Put your business in front of more customers.</h2><p>Create your listing, publish deals and grow your local visibility.</p></div>
+    <a class="btn btn-light" href="register.html?type=business">Start Your Business Listing</a>
+  </section>
+</main>
+
+<footer class="footer">
+  <strong>🦅 EAGLE-J MARKET</strong>
+  <span>Find It • Promote It • Sell It</span>
+  <span>© 2026 EAGLE-J MARKET</span>
+</footer>
+<script type="module" src="app.js"></script>
+</body>
+</html>

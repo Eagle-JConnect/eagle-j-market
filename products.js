@@ -1,0 +1,5 @@
+import { supabase, supabaseConfigured } from "./supabase.js";
+const demo=[{name:"Bonnet",price:10,business_name:"Loude Fashion Studio",description:"Colorful handmade bonnet."},{name:"Custom Dress",price:120,business_name:"Loude Fashion Studio",description:"Custom fashion service."}];
+const list=document.getElementById("productList");
+function render(d){list.innerHTML=d.map(x=>`<article class="card"><div class="card-icon">🛍️</div><div class="card-body"><span class="pill">PRODUCT</span><h3>${x.name}</h3><p>${x.description||""}</p><strong class="deal-price">$${x.price}</strong><small>${x.business_name||x.businesses?.business_name||"Local business"}</small></div></article>`).join("");}
+async function load(){let d=demo;if(supabaseConfigured){const {data,error}=await supabase.from("products").select("*, businesses(business_name)").eq("status","active").order("created_at",{ascending:false});if(!error&&data?.length)d=data.map(x=>({...x,business_name:x.businesses?.business_name}));}render(d);}load();

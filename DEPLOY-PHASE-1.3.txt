@@ -1,0 +1,17 @@
+EAGLE-J MARKET — PHASE 1.3 DEPLOYMENT
+
+IMPORTANT: These files are FLAT and deployment-ready. Upload/replace the files in the GitHub Pages repository ROOT. Do not upload the ZIP as a nested folder.
+
+After deployment, hard refresh the browser or open the site in an incognito tab.
+
+Expected mobile header:
+- EAGLE-J MARKET brand
+- 🌐 language selector (English / Français / Kreyòl)
+- 🔔 notification slot
+- ☰ menu button
+
+Expected mobile bottom navigation:
+- Home
+- Explore
+- Products
+- Account

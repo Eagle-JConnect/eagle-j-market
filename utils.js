@@ -390,22 +390,105 @@ export async function startPresence(){
 
 export function nav(active = "") {
   queueMicrotask(()=>initLanguage());
+  const activeLink = href => active && href.includes(active) ? "active" : "";
   return `
-    <header class="header">
+    <header class="header" id="siteHeader">
       <a class="brand" href="index.html">🦅 <span>EAGLE-J MARKET</span></a>
-      <nav class="nav">
-        <a class="${active==="home"?"active":""}" href="index.html">Home</a>
-        <a class="${active==="businesses"?"active":""}" href="businesses.html">Businesses</a>
-        <a class="${active==="products"?"active":""}" href="products.html">Products</a>
-        <a class="${active==="deals"?"active":""}" href="deals.html">Deals</a>
-        <a class="${active==="pricing"?"active":""}" href="pricing.html">Plans</a>
-        <a class="${active==="dashboard"?"active":""}" href="dashboard.html">My Account</a>
+      <nav class="nav" id="mainNav" aria-label="Main navigation">
+        <a class="${activeLink("index.html") || (active === "home" ? "active" : "")}" href="index.html">Home</a>
+        <a class="${active === "businesses" ? "active" : ""}" href="businesses.html">Businesses</a>
+        <a class="${active === "products" ? "active" : ""}" href="products.html">Products</a>
+        <a class="${active === "deals" ? "active" : ""}" href="deals.html">Deals</a>
+        <a class="${active === "pricing" ? "active" : ""}" href="pricing.html">Plans</a>
+        <a class="${active === "dashboard" ? "active" : ""}" href="dashboard.html">My Account</a>
+        <button type="button" class="nav-action notification-trigger" id="notificationButton" aria-expanded="false" aria-controls="notificationPanel">🔔 <span data-label="Notifications">Notifications</span> <span id="notificationBadge" class="notification-badge" hidden>0</span></button>
         <label class="language-control"><span>🌐</span><select id="languageSelect" aria-label="Language"><option value="en">English</option><option value="fr">Français</option><option value="ht">Kreyòl</option></select></label>
+        <a class="nav-action login-link" href="login.html">🔐 <span data-label="Login">Login</span></a>
+        <button type="button" class="nav-action google-menu" id="googleMenuLogin">🟢 <span data-label="Continue with Google">Gmail / Google</span></button>
+        <div class="notification-panel" id="notificationPanel" hidden>
+          <div class="notification-head"><strong data-label="Notifications">Notifications</strong><button type="button" id="closeNotifications" aria-label="Close">×</button></div>
+          <div id="notificationList" class="notification-list"><div class="notification-empty">Someone is connected</div></div>
+          <a class="btn small" href="dashboard.html" data-label="View notifications">View notifications</a>
+        </div>
       </nav>
-      <div id="presenceStatus" class="presence-status">Online</div>
-      <button type="button" class="menu" aria-label="Menu" onclick="document.querySelector('.nav').classList.toggle('open')">☰</button>
+      <div id="presenceStatus" class="presence-status" role="status" aria-live="polite">Online</div>
+      <button type="button" class="menu" aria-label="Menu" aria-expanded="false" aria-controls="mainNav">☰</button>
     </header>`;
 }
+
+export function bootGlobalUI(){
+  initLanguage();
+  const menu=document.querySelector('.menu');
+  const navEl=document.querySelector('#mainNav, .nav');
+  if(menu && navEl && !menu.dataset.bound){
+    menu.dataset.bound='1';
+    menu.addEventListener('click',()=>{
+      const open=navEl.classList.toggle('open');
+      menu.setAttribute('aria-expanded',String(open));
+    });
+  }
+
+  const notificationButton=document.querySelector('#notificationButton');
+  const panel=document.querySelector('#notificationPanel');
+  const closeNotifications=document.querySelector('#closeNotifications');
+  if(notificationButton && panel && !notificationButton.dataset.bound){
+    notificationButton.dataset.bound='1';
+    const close=()=>{panel.hidden=true;notificationButton.setAttribute('aria-expanded','false')};
+    notificationButton.addEventListener('click',async()=>{
+      panel.hidden=!panel.hidden;
+      notificationButton.setAttribute('aria-expanded',String(!panel.hidden));
+      if(!panel.hidden) await loadNotifications();
+    });
+    closeNotifications?.addEventListener('click',close);
+    document.addEventListener('click',e=>{
+      if(!panel.hidden && !panel.contains(e.target) && !notificationButton.contains(e.target)) close();
+    });
+  }
+
+  const googleButton=document.querySelector('#googleMenuLogin');
+  if(googleButton && !googleButton.dataset.bound){
+    googleButton.dataset.bound='1';
+    googleButton.addEventListener('click',async()=>{
+      if(!supabase){ location.href='login.html'; return; }
+      try{
+        const {error}=await supabase.auth.signInWithOAuth({
+          provider:'google',
+          options:{redirectTo:`${location.origin}${location.pathname.replace(/[^/]*$/, '')}login.html`}
+        });
+        if(error) toast(error.message);
+      }catch(error){ toast(error?.message||'Google login failed.'); }
+    });
+  }
+
+  startPresence();
+  loadNotifications();
+}
+
+async function loadNotifications(){
+  const list=document.querySelector('#notificationList');
+  const badge=document.querySelector('#notificationBadge');
+  if(!list) return;
+  const items=[];
+  const status=document.querySelector('#presenceStatus');
+  if(status?.textContent) items.push({title:status.textContent,body:'EAGLE-J MARKET online presence'});
+  if(supabase){
+    try{
+      const {data:userData}=await supabase.auth.getUser();
+      const uid=userData?.user?.id;
+      if(uid){
+        const {data,error}=await supabase.from('notifications').select('*').eq('user_id',uid).eq('read',false).order('created_at',{ascending:false}).limit(8);
+        if(!error){
+          for(const n of data||[]) items.push({title:n.title||'Notification',body:n.message||n.body||''});
+          if(badge){badge.textContent=String((data||[]).length);badge.hidden=!(data||[]).length;}
+        }
+      }
+    }catch(e){ console.warn('Notification load failed:',e); }
+  }
+  if(badge && !badge.textContent) badge.hidden=true;
+  list.innerHTML=items.length?items.slice(0,8).map(n=>`<div class="notification-item"><strong>${esc(n.title)}</strong><span>${esc(n.body)}</span></div>`).join(''):'<div class="notification-empty">No new notifications.</div>';
+  applyLanguage();
+}
+
 
 
 if(document.readyState==="loading") {

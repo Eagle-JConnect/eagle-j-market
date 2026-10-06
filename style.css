@@ -35,3 +35,12 @@
   .location-grid{grid-template-columns:1fr}.global-searchbar{margin-top:20px}
   .hero-actions .btn{flex:1}.nav-account{background:#eef3f8}
 }
+
+/* Mobile-first global language access */
+.header-actions{display:flex;align-items:center;gap:8px;margin-left:auto}.header-actions .language-control{margin:0}.language-label{font-size:12px;font-weight:800}.header-actions .notification-slot{display:inline-flex}.header-actions .presence-status{display:inline-flex}.nav #notificationSlot{display:inline-flex}.nav #authSlot{display:inline-flex}
+@media(max-width:850px){
+  .header{min-height:60px}.header-actions{gap:6px}.language-label{display:none}.header-actions .language-control select{min-width:88px;padding:7px 7px}.header-actions .presence-status{display:none}.header-actions .notification-link{padding:7px}.nav{top:60px}.nav #notificationSlot{display:none}.nav #authSlot{display:flex}.menu{display:block}
+}
+@media(max-width:560px){
+  .brand{font-size:15px}.header{padding:10px 4%}.header-actions .language-control select{font-size:12px;min-width:84px}.mobile-bottom-nav{padding-bottom:env(safe-area-inset-bottom)}
+}

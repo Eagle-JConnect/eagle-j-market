@@ -412,15 +412,15 @@ export async function bootGlobalUI(){
     }
   }
 
-  const notifSlot=document.querySelector('#notificationSlot');
-  if(notifSlot && supabase){
+  const notifSlots=[document.querySelector('#notificationSlot'),document.querySelector('#mobileNotificationSlot')].filter(Boolean);
+  if(notifSlots.length && supabase){
     const current=await user();
     if(current){
       const {count}=await supabase.from('notifications').select('id',{count:'exact',head:true}).eq('user_id',current.id).eq('read',false);
       const n=Number(count||0);
-      notifSlot.innerHTML=`<a class="notification-link" href="dashboard.html#notifications" aria-label="${esc(t('Notifications'))}">🔔${n?`<span class="notification-count">${n>99?'99+':n}</span>`:''}</a>`;
+      notifSlots.forEach(slot=>slot.innerHTML=`<a class="notification-link" href="dashboard.html#notifications" aria-label="${esc(t('Notifications'))}">🔔${n?`<span class="notification-count">${n>99?'99+':n}</span>`:''}</a>`);
     }else{
-      notifSlot.innerHTML='<a class="notification-link" href="login.html" aria-label="Notifications">🔔</a>';
+      notifSlots.forEach(slot=>slot.innerHTML='<a class="notification-link" href="login.html" aria-label="Notifications">🔔</a>');
     }
   }
 }
@@ -441,12 +441,15 @@ export function nav(active = "") {
         <a class="${active==="deals"?"active":""}" href="deals.html">Deals</a>
         <a class="${active==="pricing"?"active":""}" href="pricing.html">Plans</a>
         <a class="${active==="dashboard"?"active":""}" href="dashboard.html">My Account</a>
-        <label class="language-control"><span>🌐</span><select id="languageSelect" aria-label="Language"><option value="en">English</option><option value="fr">Français</option><option value="ht">Kreyòl</option></select></label>
         <span id="notificationSlot" class="notification-slot"></span>
         <span id="authSlot" class="auth-slot"></span>
       </nav>
-      <div id="presenceStatus" class="presence-status" role="status" aria-live="polite">🟢 Online</div>
-      <button type="button" class="menu" aria-label="Menu" onclick="document.querySelector('.nav').classList.toggle('open')">☰</button>
+      <div class="header-actions">
+        <label class="language-control" title="Language"><span aria-hidden="true">🌐</span><span class="language-label">Language</span><select id="languageSelect" aria-label="Language"><option value="en">English</option><option value="fr">Français</option><option value="ht">Kreyòl</option></select></label>
+        <span id="mobileNotificationSlot" class="notification-slot"></span>
+        <div id="presenceStatus" class="presence-status" role="status" aria-live="polite">🟢 Online</div>
+        <button type="button" class="menu" aria-label="Menu" onclick="document.querySelector('.nav').classList.toggle('open')">☰</button>
+      </div>
     </header>
     <div class="mobile-bottom-nav">
       <a href="index.html">⌂<span>Home</span></a>

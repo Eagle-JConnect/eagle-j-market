@@ -9,3 +9,9 @@
 .oauth-divider{text-align:center;margin:14px 0;color:#7a8491}
 .google{background:#fff!important;color:#202124!important;border:1px solid #dadce0!important}
 @media(max-width:800px){.presence-status{display:none}.language-control{margin:10px 0}.nav.open .language-control{display:flex}.upload-preview{width:100px;height:75px}}
+
+.language-control{display:flex;align-items:center;gap:5px;margin-left:4px}
+.language-control select{border:1px solid #d5dde6;background:#fff;border-radius:9px;padding:8px 9px;font-weight:700}
+.presence-status{font-size:12px;font-weight:800;color:#14633e;white-space:nowrap}
+.upload-preview{max-width:180px;max-height:120px;border-radius:10px;object-fit:cover;margin-top:8px}
+@media(max-width:850px){.presence-status{margin-left:auto;margin-right:8px}.language-control{justify-content:space-between}.searchbar{flex-direction:column}}

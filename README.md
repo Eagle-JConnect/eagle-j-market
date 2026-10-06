@@ -30,3 +30,13 @@ Upload all files to the root of the `eagle-j-market` repository. GitHub Pages sh
 
 ## Payments
 The included plan buttons create a payment request record. A real Stripe/PayPal checkout requires provider credentials and a secure backend/webhook; do not put those secret credentials in GitHub Pages.
+
+
+## Global Market Phase 1
+- The language selector now works reversibly across static and dynamically rendered UI.
+- English, Français and Kreyòl preferences persist in local storage.
+- Presence status is displayed globally and updates through Supabase Realtime.
+- Business location supports country, region/state, city, area/neighborhood, postal code and Remote/Online.
+- Businesses search supports global location filters.
+- `global-market-phase1.sql` is provided for existing Supabase databases.
+- No fake country is assigned to existing listings.

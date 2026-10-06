@@ -356,8 +356,8 @@ export async function startPresence(){
       if(!presenceChannel) return;
       const count=Object.keys(presenceChannel.presenceState()).length;
       status.textContent=count>0
-        ? `${t("Someone is connected")} • ${count}`
-        : t("Online");
+        ? `🟢 ${t("Someone is connected")} • ${count}`
+        : `🟢 ${t("Online")}`;
       status.classList.add("presence-online");
     };
 
@@ -402,7 +402,7 @@ export function nav(active = "") {
         <a class="${active==="dashboard"?"active":""}" href="dashboard.html">My Account</a>
         <label class="language-control"><span>🌐</span><select id="languageSelect" aria-label="Language"><option value="en">English</option><option value="fr">Français</option><option value="ht">Kreyòl</option></select></label>
       </nav>
-      <div id="presenceStatus" class="presence-status">Online</div>
+      <div id="presenceStatus" class="presence-status" role="status" aria-live="polite">🟢 Online</div>
       <button type="button" class="menu" aria-label="Menu" onclick="document.querySelector('.nav').classList.toggle('open')">☰</button>
     </header>`;
 }

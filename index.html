@@ -1,14 +1,14 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EAGLE-J MARKET | Global Marketplace</title><link rel="stylesheet" href="style.css?v=phase1-3"></head><body><div id="nav"></div><section class="hero"><div class="hero-inner"><span class="eyebrow">GLOBAL MARKET</span><h1>Find It. Promote It. Sell It.</h1><p>EAGLE-J MARKET connects people with businesses, products, services and deals worldwide.</p><div class="searchbar global-searchbar">
-<input id="homeSearch" placeholder="Search businesses, products, services, deals...">
-<button class="btn" id="searchBtn">Search Market</button>
-</div>
-<div class="location-search panel">
-  <div class="location-title">📍 <b>Global location</b><span class="muted">Choose where you want to discover.</span></div>
-  <div class="location-grid">
-    <input id="homeCountry" placeholder="Country">
-    <input id="homeRegion" placeholder="Region / State">
-    <input id="homeCity" placeholder="City">
-    <input id="homePostal" placeholder="Postal code">
-    <label class="chip remote-chip"><input id="homeRemote" type="checkbox"> Remote / Online</label>
-  </div>
-</div><div class="hero-actions"><a class="btn" href="register.html?type=business">List a Business</a><a class="btn secondary" href="businesses.html">Explore Businesses</a><a class="btn secondary" href="products.html">Shop Products</a></div></div></section><main class="page"><section class="section"><div class="toolbar"><div><span class="eyebrow">EXPLORE</span><h2>Popular Categories</h2></div><a class="btn secondary" href="businesses.html">View All</a></div><div id="categories" class="grid-4"></div></section><section class="section"><div class="toolbar"><div><span class="eyebrow">GLOBAL DISCOVERY</span><h2>Featured Businesses</h2></div><a class="btn secondary" href="businesses.html">See Market</a></div><div id="featured" class="grid"></div></section><section class="section"><div class="panel" style="padding:28px"><span class="eyebrow">FOR BUSINESS OWNERS</span><h2>Put your business in front of customers worldwide.</h2><p class="muted">Create a free listing, add products and deals, then upgrade when you need more visibility.</p><a class="btn" href="register.html?type=business">Create Business Account</a></div></section></main><div id="footer"></div><script type="module" src="app.js?v=phase1-3"></script></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EAGLE-J MARKET | Global Marketplace</title><link rel="stylesheet" href="style.css"></head><body><div id="nav"><header class="header" id="siteHeader">
+  <a class="brand" href="index.html">🦅 <span>EAGLE-J MARKET</span></a>
+  <nav class="nav" aria-label="Main navigation">
+    <a href="index.html">Home</a>
+    <a href="businesses.html">Businesses</a>
+    <a href="products.html">Products</a>
+    <a href="deals.html">Deals</a>
+    <a href="pricing.html">Plans</a>
+    <a href="dashboard.html">My Account</a>
+    <label class="language-control"><span>🌐</span><select id="languageSelect" aria-label="Language"><option value="en">English</option><option value="fr">Français</option><option value="ht">Kreyòl</option></select></label>
+  </nav>
+  <div id="presenceStatus" class="presence-status" role="status" aria-live="polite">Online</div>
+  <button type="button" class="menu" aria-label="Menu" aria-expanded="false" onclick="const n=document.querySelector('.nav'); const open=n.classList.toggle('open'); this.setAttribute('aria-expanded',open)">☰</button>
+</header></div><section class="hero"><div class="hero-inner"><span class="eyebrow">GLOBAL MARKET</span><h1>Find It. Promote It. Sell It.</h1><p>EAGLE-J MARKET connects customers with local businesses, products, services and deals.</p><div class="searchbar"><input id="homeSearch" placeholder="Search restaurants, fashion, auto, services..."><button class="btn" id="searchBtn">Search Market</button></div><div class="hero-actions"><a class="btn" href="register.html?type=business">List My Business</a><a class="btn secondary" href="businesses.html">Explore Businesses</a></div></div></section><main class="page"><section class="section"><div class="toolbar"><div><span class="eyebrow">EXPLORE</span><h2>Popular Categories</h2></div><a class="btn secondary" href="businesses.html">View All</a></div><div id="categories" class="grid-4"></div></section><section class="section"><div class="toolbar"><div><span class="eyebrow">LOCAL</span><h2>Featured Businesses</h2></div><a class="btn secondary" href="businesses.html">See Market</a></div><div id="featured" class="grid"></div></section><section class="section"><div class="panel" style="padding:28px"><span class="eyebrow">FOR BUSINESS OWNERS</span><h2>Put your business in front of your area customers.</h2><p class="muted">Create a free listing, add products and deals, then upgrade when you need more visibility.</p><a class="btn" href="register.html?type=business">Create Business Account</a></div></section></main><div id="footer"></div><script type="module" src="app.js"></script></body></html>

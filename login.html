@@ -1,1 +1,14 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login | EAGLE-J MARKET</title><link rel="stylesheet" href="style.css?v=phase1-3"></head><body><div id="nav"></div><main class="page"><form id="form" class="form-card"><h1>Welcome back</h1><p class="muted">Login to EAGLE-J MARKET.</p><div id="msg" class="message"></div><div class="field"><label>Email</label><input id="email" type="email" required></div><br><div class="field"><label>Password</label><input id="password" type="password" minlength="6" required></div><br><button class="btn" style="width:100%">Login</button><div class="oauth-divider"><span>or</span></div><button type="button" class="btn google" id="googleLogin" style="width:100%">Continue with Google</button><p><a href="register.html">Create account</a> • <a href="index.html">Home</a></p></form></main><script type="module" src="auth.js?v=phase1-3"></script></body></html>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login | EAGLE-J MARKET</title><link rel="stylesheet" href="style.css"></head><body><div id="nav"><header class="header" id="siteHeader">
+  <a class="brand" href="index.html">🦅 <span>EAGLE-J MARKET</span></a>
+  <nav class="nav" aria-label="Main navigation">
+    <a href="index.html">Home</a>
+    <a href="businesses.html">Businesses</a>
+    <a href="products.html">Products</a>
+    <a href="deals.html">Deals</a>
+    <a href="pricing.html">Plans</a>
+    <a href="dashboard.html">My Account</a>
+    <label class="language-control"><span>🌐</span><select id="languageSelect" aria-label="Language"><option value="en">English</option><option value="fr">Français</option><option value="ht">Kreyòl</option></select></label>
+  </nav>
+  <div id="presenceStatus" class="presence-status" role="status" aria-live="polite">Online</div>
+  <button type="button" class="menu" aria-label="Menu" aria-expanded="false" onclick="const n=document.querySelector('.nav'); const open=n.classList.toggle('open'); this.setAttribute('aria-expanded',open)">☰</button>
+</header></div><main class="page"><form id="form" class="form-card"><h1>Welcome back</h1><p class="muted">Login to EAGLE-J MARKET.</p><div id="msg" class="message"></div><div class="field"><label>Email</label><input id="email" type="email" required></div><br><div class="field"><label>Password</label><input id="password" type="password" minlength="6" required></div><br><button class="btn" style="width:100%">Login</button><div class="oauth-divider"><span>or</span></div><button type="button" class="btn google" id="googleLogin" style="width:100%">Continue with Google</button><p><a href="register.html">Create account</a> • <a href="index.html">Home</a></p></form></main><script type="module" src="auth.js"></script></body></html>

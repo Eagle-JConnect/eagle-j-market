@@ -356,8 +356,8 @@ export async function startPresence(){
       if(!presenceChannel) return;
       const count=Object.keys(presenceChannel.presenceState()).length;
       status.textContent=count>0
-        ? `🟢 ${t("Someone is connected")} • ${count}`
-        : `🟢 ${t("Online")}`;
+        ? `${t("Someone is connected")} • ${count}`
+        : t("Online");
       status.classList.add("presence-online");
     };
 
@@ -384,47 +384,6 @@ export async function startPresence(){
   }
 }
 
-
-/* =========================
-   GLOBAL UI BOOTSTRAP
-========================= */
-export async function bootGlobalUI(){
-  initLanguage();
-  startPresence();
-
-  const authSlot=document.querySelector('#authSlot');
-  if(authSlot){
-    if(!supabase){
-      authSlot.innerHTML=`<a class="btn small" href="login.html">${esc(t('Login'))}</a>`;
-      return;
-    }
-    const current=await user();
-    if(current){
-      const p=await profile();
-      const name=(p?.first_name||current.user_metadata?.first_name||current.email?.split('@')[0]||'Account').trim();
-      authSlot.innerHTML=`<a class="nav-account" href="dashboard.html">👤 ${esc(name)}</a><button type="button" class="btn small secondary" id="navLogout">${esc(t('Logout'))}</button>`;
-      document.querySelector('#navLogout')?.addEventListener('click',async()=>{
-        const result=await logout();
-        if(result.success) location.href='index.html';
-      });
-    }else{
-      authSlot.innerHTML=`<a class="nav-account" href="login.html">${esc(t('Login'))}</a><a class="btn small" href="register.html">${esc(t('Create account'))}</a>`;
-    }
-  }
-
-  const notifSlots=[document.querySelector('#notificationSlot'),document.querySelector('#mobileNotificationSlot')].filter(Boolean);
-  if(notifSlots.length && supabase){
-    const current=await user();
-    if(current){
-      const {count}=await supabase.from('notifications').select('id',{count:'exact',head:true}).eq('user_id',current.id).eq('read',false);
-      const n=Number(count||0);
-      notifSlots.forEach(slot=>slot.innerHTML=`<a class="notification-link" href="dashboard.html#notifications" aria-label="${esc(t('Notifications'))}">🔔${n?`<span class="notification-count">${n>99?'99+':n}</span>`:''}</a>`);
-    }else{
-      notifSlots.forEach(slot=>slot.innerHTML='<a class="notification-link" href="login.html" aria-label="Notifications">🔔</a>');
-    }
-  }
-}
-
 /* =========================
    NAVIGATION
 ========================= */
@@ -441,22 +400,11 @@ export function nav(active = "") {
         <a class="${active==="deals"?"active":""}" href="deals.html">Deals</a>
         <a class="${active==="pricing"?"active":""}" href="pricing.html">Plans</a>
         <a class="${active==="dashboard"?"active":""}" href="dashboard.html">My Account</a>
-        <span id="notificationSlot" class="notification-slot"></span>
-        <span id="authSlot" class="auth-slot"></span>
+        <label class="language-control"><span>🌐</span><select id="languageSelect" aria-label="Language"><option value="en">English</option><option value="fr">Français</option><option value="ht">Kreyòl</option></select></label>
       </nav>
-      <div class="header-actions">
-        <label class="language-control" title="Language"><span aria-hidden="true">🌐</span><span class="language-label">Language</span><select id="languageSelect" aria-label="Language"><option value="en">English</option><option value="fr">Français</option><option value="ht">Kreyòl</option></select></label>
-        <span id="mobileNotificationSlot" class="notification-slot"></span>
-        <div id="presenceStatus" class="presence-status" role="status" aria-live="polite">🟢 Online</div>
-        <button type="button" class="menu" aria-label="Menu" onclick="document.querySelector('.nav').classList.toggle('open')">☰</button>
-      </div>
-    </header>
-    <div class="mobile-bottom-nav">
-      <a href="index.html">⌂<span>Home</span></a>
-      <a href="businesses.html">⌕<span>Explore</span></a>
-      <a href="products.html">🛍<span>Products</span></a>
-      <a href="dashboard.html">👤<span>Account</span></a>
-    </div>`;
+      <div id="presenceStatus" class="presence-status">Online</div>
+      <button type="button" class="menu" aria-label="Menu" onclick="document.querySelector('.nav').classList.toggle('open')">☰</button>
+    </header>`;
 }
 
 

@@ -1,10 +1,14 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Businesses | EAGLE-J MARKET</title><link rel="stylesheet" href="style.css?v=phase1-3"></head><body><div id="nav"></div><main class="page"><div class="page-head"><span class="eyebrow">GLOBAL MARKET</span><h1>Businesses</h1><p class="muted">Discover approved businesses, wherever they are located.</p></div><div class="searchbar" style="max-width:none;flex-wrap:wrap">
-<input id="q" placeholder="Search business name or description">
-<select id="cat"><option value="">All categories</option></select>
-<input id="country" placeholder="Country">
-<input id="region" placeholder="Region / State">
-<input id="city" placeholder="City">
-<input id="postal" placeholder="Postal code">
-<label class="chip"><input id="remote" type="checkbox"> Remote / Online</label>
-<button class="btn" id="go">Search</button>
-</div><div id="list" class="grid" style="margin-top:22px"></div></main><script type="module" src="businesses.js?v=phase1-3"></script></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Businesses | EAGLE-J MARKET</title><link rel="stylesheet" href="style.css"></head><body><div id="nav"><header class="header" id="siteHeader">
+  <a class="brand" href="index.html">🦅 <span>EAGLE-J MARKET</span></a>
+  <nav class="nav" aria-label="Main navigation">
+    <a href="index.html">Home</a>
+    <a href="businesses.html">Businesses</a>
+    <a href="products.html">Products</a>
+    <a href="deals.html">Deals</a>
+    <a href="pricing.html">Plans</a>
+    <a href="dashboard.html">My Account</a>
+    <label class="language-control"><span>🌐</span><select id="languageSelect" aria-label="Language"><option value="en">English</option><option value="fr">Français</option><option value="ht">Kreyòl</option></select></label>
+  </nav>
+  <div id="presenceStatus" class="presence-status" role="status" aria-live="polite">Online</div>
+  <button type="button" class="menu" aria-label="Menu" aria-expanded="false" onclick="const n=document.querySelector('.nav'); const open=n.classList.toggle('open'); this.setAttribute('aria-expanded',open)">☰</button>
+</header></div><main class="page"><div class="page-head"><span class="eyebrow">LOCAL MARKET</span><h1>Businesses</h1><p class="muted">Discover approved businesses worldwide.</p></div><div class="searchbar" style="max-width:none"><input id="q" placeholder="Search business name or description"><select id="cat"><option value="">All categories</option></select><button class="btn" id="go">Search</button></div><div id="list" class="grid" style="margin-top:22px"></div></main><script type="module" src="businesses.js"></script></body></html>

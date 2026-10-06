@@ -384,6 +384,47 @@ export async function startPresence(){
   }
 }
 
+
+/* =========================
+   GLOBAL UI BOOTSTRAP
+========================= */
+export async function bootGlobalUI(){
+  initLanguage();
+  startPresence();
+
+  const authSlot=document.querySelector('#authSlot');
+  if(authSlot){
+    if(!supabase){
+      authSlot.innerHTML=`<a class="btn small" href="login.html">${esc(t('Login'))}</a>`;
+      return;
+    }
+    const current=await user();
+    if(current){
+      const p=await profile();
+      const name=(p?.first_name||current.user_metadata?.first_name||current.email?.split('@')[0]||'Account').trim();
+      authSlot.innerHTML=`<a class="nav-account" href="dashboard.html">👤 ${esc(name)}</a><button type="button" class="btn small secondary" id="navLogout">${esc(t('Logout'))}</button>`;
+      document.querySelector('#navLogout')?.addEventListener('click',async()=>{
+        const result=await logout();
+        if(result.success) location.href='index.html';
+      });
+    }else{
+      authSlot.innerHTML=`<a class="nav-account" href="login.html">${esc(t('Login'))}</a><a class="btn small" href="register.html">${esc(t('Create account'))}</a>`;
+    }
+  }
+
+  const notifSlot=document.querySelector('#notificationSlot');
+  if(notifSlot && supabase){
+    const current=await user();
+    if(current){
+      const {count}=await supabase.from('notifications').select('id',{count:'exact',head:true}).eq('user_id',current.id).eq('read',false);
+      const n=Number(count||0);
+      notifSlot.innerHTML=`<a class="notification-link" href="dashboard.html#notifications" aria-label="${esc(t('Notifications'))}">🔔${n?`<span class="notification-count">${n>99?'99+':n}</span>`:''}</a>`;
+    }else{
+      notifSlot.innerHTML='<a class="notification-link" href="login.html" aria-label="Notifications">🔔</a>';
+    }
+  }
+}
+
 /* =========================
    NAVIGATION
 ========================= */
@@ -401,10 +442,18 @@ export function nav(active = "") {
         <a class="${active==="pricing"?"active":""}" href="pricing.html">Plans</a>
         <a class="${active==="dashboard"?"active":""}" href="dashboard.html">My Account</a>
         <label class="language-control"><span>🌐</span><select id="languageSelect" aria-label="Language"><option value="en">English</option><option value="fr">Français</option><option value="ht">Kreyòl</option></select></label>
+        <span id="notificationSlot" class="notification-slot"></span>
+        <span id="authSlot" class="auth-slot"></span>
       </nav>
       <div id="presenceStatus" class="presence-status" role="status" aria-live="polite">🟢 Online</div>
       <button type="button" class="menu" aria-label="Menu" onclick="document.querySelector('.nav').classList.toggle('open')">☰</button>
-    </header>`;
+    </header>
+    <div class="mobile-bottom-nav">
+      <a href="index.html">⌂<span>Home</span></a>
+      <a href="businesses.html">⌕<span>Explore</span></a>
+      <a href="products.html">🛍<span>Products</span></a>
+      <a href="dashboard.html">👤<span>Account</span></a>
+    </div>`;
 }
 
 

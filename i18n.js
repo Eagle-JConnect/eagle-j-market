@@ -37,7 +37,7 @@ const translations = {
     "GLOBAL MARKET":"GLOBAL MARKET","EXPLORE":"EXPLORE","LOCAL":"GLOBAL DISCOVERY","YOUR GLOBAL MARKETPLACE":"YOUR GLOBAL MARKETPLACE",
     "Discover businesses, products, services and deals from anywhere.":"Discover businesses, products, services and deals from anywhere.",
     "Worldwide":"Worldwide","Remote":"Remote","Any country":"Any country","Any city":"Any city","Any region":"Any region",
-    "No location selected":"No location selected"
+    "No location selected":"No location selected","Notifications":"Notifications","Global location":"Global location","Choose where you want to discover.":"Choose where you want to discover.","Search businesses, products, services, deals...":"Search businesses, products, services, deals...","Shop Products":"Shop Products","Explore":"Explore","Account":"Account","Discover approved businesses, wherever they are located.":"Discover approved businesses, wherever they are located.","Explore listings":"Explore listings"
   },
   fr: {
     "Home":"Accueil","Businesses":"Entreprises","Products":"Produits","Deals":"Offres","Plans":"Forfaits","My Account":"Mon compte",
@@ -73,7 +73,7 @@ const translations = {
     "GLOBAL MARKET":"MARCHÉ MONDIAL","EXPLORE":"EXPLORER","LOCAL":"DÉCOUVERTE MONDIALE","YOUR GLOBAL MARKETPLACE":"VOTRE MARCHÉ MONDIAL",
     "Discover businesses, products, services and deals from anywhere.":"Découvrez des entreprises, produits, services et offres partout dans le monde.",
     "Worldwide":"Monde entier","Remote":"À distance","Any country":"Tous les pays","Any city":"Toutes les villes","Any region":"Toutes les régions",
-    "No location selected":"Aucun lieu sélectionné"
+    "No location selected":"Aucun lieu sélectionné","Notifications":"Notifications","Global location":"Emplacement mondial","Choose where you want to discover.":"Choisissez où vous souhaitez découvrir.","Search businesses, products, services, deals...":"Rechercher entreprises, produits, services, offres...","Shop Products":"Acheter des produits","Explore":"Explorer","Account":"Compte","Discover approved businesses, wherever they are located.":"Découvrez des entreprises approuvées, où qu'elles se trouvent.","Explore listings":"Explorer les annonces"
   },
   ht: {
     "Home":"Akèy","Businesses":"Biznis","Products":"Pwodwi","Deals":"Òf","Plans":"Plan","My Account":"Kont mwen",
@@ -105,9 +105,31 @@ const translations = {
     "Save Profile":"Anrejistre pwofil","Profile":"Pwofil","Manage your profile, favorites and notifications.":"Jere pwofil ou, favori ou ak notifikasyon ou yo.",
     "Profile saved":"Pwofil anrejistre","GLOBAL MARKET":"MACHE MONDYAL","EXPLORE":"DEKOUVRI","LOCAL":"DEKOUVRI ATRAVÈ LEMOND",
     "YOUR GLOBAL MARKETPLACE":"MACHE MONDYAL OU","Discover businesses, products, services and deals from anywhere.":"Dekouvri biznis, pwodwi, sèvis ak òf nenpòt kote nan mond lan.",
-    "Worldwide":"Atravè lemond","Remote":"A distans","Any country":"Tout peyi","Any city":"Tout vil","Any region":"Tout rejyon","No location selected":"Pa gen kote chwazi"
+    "Worldwide":"Atravè lemond","Remote":"A distans","Any country":"Tout peyi","Any city":"Tout vil","Any region":"Tout rejyon","No location selected":"Pa gen kote chwazi","Notifications":"Notifikasyon","Global location":"Kote mondyal","Choose where you want to discover.":"Chwazi kote ou vle dekouvri.","Search businesses, products, services, deals...":"Chèche biznis, pwodwi, sèvis, òf...","Shop Products":"Achte pwodwi","Explore":"Dekouvri","Account":"Kont","Discover approved businesses, wherever they are located.":"Dekouvri biznis ki apwouve, nenpòt kote yo ye.","Explore listings":"Dekouvri anons yo"
   }
 };
+
+Object.assign(translations.en, {
+  "GLOBAL DISCOVERY":"GLOBAL DISCOVERY","View":"View","Business":"Business","Contact available":"Contact available",
+  "Put your business in front of customers worldwide.":"Put your business in front of customers worldwide.",
+  "Current promotions from local businesses.":"Current promotions from businesses worldwide.","Products from approved approved businesses.":"Products from approved businesses worldwide.",
+  "First name":"First name","Last name":"Last name","Password":"Password","Phone / WhatsApp":"Phone / WhatsApp","Already registered?":"Already registered?",
+  "Create Account":"Create Account","Dashboard":"Dashboard","Market":"Market","Loading...":"Loading...","View":"View"
+});
+Object.assign(translations.fr, {
+  "GLOBAL DISCOVERY":"DÉCOUVERTE MONDIALE","View":"Voir","Business":"Entreprise","Contact available":"Contact disponible",
+  "Put your business in front of customers worldwide.":"Présentez votre entreprise à des clients partout dans le monde.",
+  "Current promotions from local businesses.":"Promotions actuelles des entreprises du monde entier.","Products from approved approved businesses.":"Produits des entreprises approuvées dans le monde entier.",
+  "First name":"Prénom","Last name":"Nom","Password":"Mot de passe","Phone / WhatsApp":"Téléphone / WhatsApp","Already registered?":"Déjà inscrit ?",
+  "Create Account":"Créer le compte","Dashboard":"Tableau de bord","Market":"Marché","Loading...":"Chargement..."
+});
+Object.assign(translations.ht, {
+  "GLOBAL DISCOVERY":"DEKOUVRI ATRAVÈ LEMOND","View":"Gade","Business":"Biznis","Contact available":"Kontak disponib",
+  "Put your business in front of customers worldwide.":"Mete biznis ou devan kliyan atravè lemond.",
+  "Current promotions from local businesses.":"Pwomosyon aktyèl biznis atravè lemond.","Products from approved approved businesses.":"Pwodwi biznis ki apwouve atravè lemond.",
+  "First name":"Prenon","Last name":"Siyati","Password":"Modpas","Phone / WhatsApp":"Telefòn / WhatsApp","Already registered?":"Ou deja enskri?",
+  "Create Account":"Kreye kont","Dashboard":"Tablo","Market":"Mache","Loading...":"Ap chaje..."
+});
 
 export function getLanguage(){ return localStorage.getItem("eaglej-language") || "en"; }
 export function t(value){ return translations[getLanguage()]?.[value] || value; }

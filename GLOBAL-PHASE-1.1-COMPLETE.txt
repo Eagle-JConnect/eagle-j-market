@@ -1,0 +1,17 @@
+EAGLE-J MARKET — GLOBAL PHASE 1.1
+
+Implemented:
+- Global location discovery on homepage (country, region/state, city, postal code, Remote/Online)
+- Global location filters passed into business search
+- Mobile bottom navigation
+- Login/Create account controls in the global header
+- Notification bell with unread notification count for signed-in users
+- Online presence status retained
+- Google login retained
+- Global wording fixes: no local-only marketplace language on Products/Deals pages
+- Fixed missing bootGlobalUI export used by the site modules
+- Added translations for new global navigation/discovery labels
+- JavaScript syntax validation passed for all JS files
+
+Database:
+- No additional SQL migration is required for this UI-only phase beyond the existing global-market-phase1.sql migration.

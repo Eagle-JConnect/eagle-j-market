@@ -1,91 +1,192 @@
 import { supabase } from "./supabase.js";
 
-export const $ = (s, r = document) => r.querySelector(s);
+export const $ = (selector, root = document) =>
+  root.querySelector(selector);
 
-export const $$ = (s, r = document) =>
-  [...r.querySelectorAll(s)];
+export const $$ = (selector, root = document) =>
+  [...root.querySelectorAll(selector)];
 
-export function esc(v) {
-  return String(v ?? "").replace(
+
+/* =========================
+   ESCAPE HTML
+========================= */
+
+export function esc(value) {
+  return String(value ?? "").replace(
     /[&<>'"]/g,
-    c => ({
+    character => ({
       "&": "&amp;",
       "<": "&lt;",
       ">": "&gt;",
       "'": "&#39;",
       '"': "&quot;"
-    }[c])
+    }[character])
   );
 }
 
-export function money(v, c = "USD") {
-  return v == null || v === ""
-    ? "—"
-    : new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: c
-      }).format(Number(v));
+
+/* =========================
+   MONEY
+========================= */
+
+export function money(value, currency = "USD") {
+
+  if (value == null || value === "") {
+    return "—";
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency
+  }).format(Number(value));
 }
 
-export function slugify(s) {
-  return String(s || "")
+
+/* =========================
+   SLUGIFY
+========================= */
+
+export function slugify(value) {
+
+  return String(value || "")
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 }
 
+
+/* =========================
+   CURRENT USER
+========================= */
+
 export async function user() {
-  if (!supabase) return null;
 
-  const { data, error } =
-    await supabase.auth.getUser();
-
-  if (error) {
-    console.error("Get user error:", error);
+  if (!supabase) {
+    console.error("Supabase is not available.");
     return null;
   }
 
-  return data?.user || null;
+  try {
+
+    const { data, error } =
+      await supabase.auth.getUser();
+
+    if (error) {
+      console.error(
+        "Get user error:",
+        error
+      );
+
+      return null;
+    }
+
+    return data?.user || null;
+
+  } catch (error) {
+
+    console.error(
+      "Unexpected user error:",
+      error
+    );
+
+    return null;
+  }
 }
+
+
+/* =========================
+   CURRENT PROFILE
+========================= */
 
 export async function profile() {
-  const u = await user();
 
-  if (!u) return null;
+  const currentUser =
+    await user();
 
-  const { data, error } =
-    await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", u.id)
-      .maybeSingle();
-
-  if (error) {
-    console.error("Profile error:", error);
+  if (!currentUser) {
     return null;
   }
 
-  return data || null;
+  try {
+
+    const { data, error } =
+      await supabase
+        .from("profiles")
+        .select("*")
+        .eq(
+          "user_id",
+          currentUser.id
+        )
+        .maybeSingle();
+
+    if (error) {
+
+      console.error(
+        "Profile error:",
+        error
+      );
+
+      return null;
+    }
+
+    return data || null;
+
+  } catch (error) {
+
+    console.error(
+      "Unexpected profile error:",
+      error
+    );
+
+    return null;
+  }
 }
 
-export function toast(msg, ok = false) {
-  let el = $("#toast");
 
-  if (!el) {
-    el = document.createElement("div");
-    el.id = "toast";
-    document.body.appendChild(el);
+/* =========================
+   TOAST
+========================= */
+
+export function toast(
+  message,
+  success = false
+) {
+
+  let element =
+    $("#toast");
+
+  if (!element) {
+
+    element =
+      document.createElement("div");
+
+    element.id =
+      "toast";
+
+    document.body.appendChild(
+      element
+    );
   }
 
-  el.textContent = msg;
-  el.className = "toast " + (ok ? "ok" : "");
+  element.textContent =
+    message;
+
+  element.className =
+    "toast " +
+    (success ? "ok" : "");
+
+  element.classList.add(
+    "show"
+  );
 
   setTimeout(() => {
-    el.classList.remove("show");
-  }, 2500);
 
-  el.classList.add("show");
+    element.classList.remove(
+      "show"
+    );
+
+  }, 2500);
 }
 
 
@@ -94,19 +195,24 @@ export function toast(msg, ok = false) {
 ========================= */
 
 export async function requireAuth() {
-  const u = await user();
 
-  if (!u) {
-    location.href =
+  const currentUser =
+    await user();
+
+  if (!currentUser) {
+
+    window.location.replace(
       "login.html?next=" +
       encodeURIComponent(
-        location.pathname + location.search
-      );
+        window.location.pathname +
+        window.location.search
+      )
+    );
 
     return null;
   }
 
-  return u;
+  return currentUser;
 }
 
 
@@ -114,71 +220,59 @@ export async function requireAuth() {
    LOGOUT
 ========================= */
 
-export async function logout(event) {
-
-  if (event) {
-    event.preventDefault();
-    event.stopPropagation();
-  }
+export async function logout() {
 
   try {
 
-    console.log("EAGLE-J MARKET: Logging out...");
+    console.log(
+      "EAGLE-J MARKET: logout started"
+    );
 
-    const { error } =
+
+    const {
+      error
+    } =
       await supabase.auth.signOut({
-        scope: "global"
+        scope: "local"
       });
 
-    if (error) {
-      console.error("Logout error:", error);
 
-      toast(
-        "Logout failed: " + error.message,
-        false
+    if (error) {
+
+      console.error(
+        "Supabase logout error:",
+        error
       );
 
-      return false;
+      return {
+        success: false,
+        error
+      };
     }
 
+
     console.log(
-      "EAGLE-J MARKET: Logout successful"
+      "EAGLE-J MARKET: logout successful"
     );
 
-    /*
-      Give Supabase a moment to update
-      the authentication state.
-    */
 
-    await new Promise(resolve =>
-      setTimeout(resolve, 300)
-    );
+    return {
+      success: true,
+      error: null
+    };
 
-    /*
-      Replace the current page so the
-      browser cannot simply return to
-      the previous Admin page.
-    */
 
-    window.location.replace(
-      "./login.html"
-    );
-
-    return true;
-
-  } catch (err) {
+  } catch (error) {
 
     console.error(
-      "Unexpected logout error:",
-      err
+      "Logout exception:",
+      error
     );
 
-    toast(
-      "Unable to logout. Please try again.",
-      false
-    );
-
-    return false;
+    return {
+      success: false,
+      error
+    };
   }
 }
 
@@ -187,12 +281,28 @@ export async function logout(event) {
    IMAGE
 ========================= */
 
-export function img(url, alt = "") {
-  return url
-    ? `<img src="${esc(url)}" alt="${esc(
-        alt
-      )}" loading="lazy">`
-    : `<div class="img-placeholder">🦅</div>`;
+export function img(
+  url,
+  alt = ""
+) {
+
+  if (url) {
+
+    return `
+      <img
+        src="${esc(url)}"
+        alt="${esc(alt)}"
+        loading="lazy"
+      >
+    `;
+
+  }
+
+  return `
+    <div class="img-placeholder">
+      🦅
+    </div>
+  `;
 }
 
 
@@ -203,51 +313,71 @@ export function img(url, alt = "") {
 export function nav(active = "") {
 
   return `
+
     <header class="header">
 
-      <a class="brand" href="index.html">
-        🦅 <span>EAGLE-J MARKET</span>
+      <a
+        class="brand"
+        href="index.html"
+      >
+        🦅
+        <span>
+          EAGLE-J MARKET
+        </span>
       </a>
+
 
       <nav class="nav">
 
-        <a class="${
-          active === "home" ? "active" : ""
-        }" href="index.html">
+        <a
+          class="${active === "home" ? "active" : ""}"
+          href="index.html"
+        >
           Home
         </a>
 
-        <a class="${
-          active === "businesses" ? "active" : ""
-        }" href="businesses.html">
+
+        <a
+          class="${active === "businesses" ? "active" : ""}"
+          href="businesses.html"
+        >
           Businesses
         </a>
 
-        <a class="${
-          active === "products" ? "active" : ""
-        }" href="products.html">
+
+        <a
+          class="${active === "products" ? "active" : ""}"
+          href="products.html"
+        >
           Products
         </a>
 
-        <a class="${
-          active === "deals" ? "active" : ""
-        }" href="deals.html">
+
+        <a
+          class="${active === "deals" ? "active" : ""}"
+          href="deals.html"
+        >
           Deals
         </a>
 
-        <a class="${
-          active === "pricing" ? "active" : ""
-        }" href="pricing.html">
+
+        <a
+          class="${active === "pricing" ? "active" : ""}"
+          href="pricing.html"
+        >
           Plans
         </a>
 
-        <a class="${
-          active === "dashboard" ? "active" : ""
-        }" href="dashboard.html">
+
+        <a
+          class="${active === "dashboard" ? "active" : ""}"
+          href="dashboard.html"
+        >
           My Account
         </a>
 
       </nav>
+
 
       <button
         type="button"
@@ -255,11 +385,14 @@ export function nav(active = "") {
         onclick="
           document
             .querySelector('.nav')
-            .classList.toggle('open')
-        ">
+            .classList
+            .toggle('open')
+        "
+      >
         ☰
       </button>
 
     </header>
+
   `;
 }

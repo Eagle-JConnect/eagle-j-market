@@ -1,6 +1,6 @@
 # EAGLE-J MARKET — Final GitHub/Supabase Edition
 
-A Nassau/Bahamas local marketplace: **Find It • Promote It • Sell It**.
+A global local marketplace: **Find It • Promote It • Sell It**.
 
 ## Included
 - Customer registration/login/profile

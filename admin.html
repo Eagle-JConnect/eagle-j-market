@@ -1,198 +1,29 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-
-  <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title>EAGLE-J MARKET - Admin Dashboard</title>
-
-  <link
-    rel="stylesheet"
-    href="./style.css"
-  >
-
-</head>
-
-
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EAGLE-J MARKET — Admin Dashboard</title><link rel="stylesheet" href="./style.css"></head>
 <body>
-
-
-  <!-- NAVIGATION -->
-
-  <div id="nav"></div>
-
-
-  <main class="container">
-
-
-    <!-- ADMIN HEADER -->
-
-    <section class="admin-header">
-
-      <div>
-
-        <h1>Admin Dashboard</h1>
-
-        <p>Manage EAGLE-J MARKET</p>
-
-      </div>
-
-
-      <button
-        type="button"
-        id="logout"
-        class="btn danger"
-      >
-        Logout
-      </button>
-
-    </section>
-
-
-
-    <!-- STATS -->
-
-    <section class="stats">
-
-
-      <div class="card">
-
-        <h3>Users</h3>
-
-        <strong id="users">0</strong>
-
-      </div>
-
-
-      <div class="card">
-
-        <h3>Pending Businesses</h3>
-
-        <strong id="pending">0</strong>
-
-      </div>
-
-
-      <div class="card">
-
-        <h3>Total Businesses</h3>
-
-        <strong id="businesses">0</strong>
-
-      </div>
-
-
-      <div class="card">
-
-        <h3>Pending Payments</h3>
-
-        <strong id="payments">0</strong>
-
-      </div>
-
-
-    </section>
-
-
-
-    <!-- ADMIN TABS -->
-
-    <div class="admin-nav">
-
-      <button
-        type="button"
-        class="btn"
-        data-tab="businessTab"
-      >
-        Businesses
-      </button>
-
-
-      <button
-        type="button"
-        class="btn"
-        data-tab="usersTab"
-      >
-        Users
-      </button>
-
-
-      <button
-        type="button"
-        class="btn"
-        data-tab="paymentsTab"
-      >
-        Payments
-      </button>
-
+<div id="nav"></div>
+<main class="page">
+  <section class="admin-header panel" style="padding:24px;display:flex;justify-content:space-between;gap:16px;align-items:center">
+    <div><span class="eyebrow">CONTROL CENTER</span><h1>Admin Dashboard</h1><p class="muted">Manage users, businesses, products and payments.</p></div>
+    <button id="logout" class="btn danger">Logout</button>
+  </section>
+  <section class="stats" style="margin-top:18px">
+    <div class="stat"><b id="users">0</b><span>Users</span></div>
+    <div class="stat"><b id="pending">0</b><span>Pending Businesses</span></div>
+    <div class="stat"><b id="businesses">0</b><span>Total Businesses</span></div>
+    <div class="stat"><b id="payments">0</b><span>Pending Payments</span></div>
+  </section>
+  <section class="panel" style="padding:18px;margin-top:18px">
+    <div class="admin-nav" style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" class="btn" data-tab="businessTab">Businesses</button>
+      <button type="button" class="btn secondary" data-tab="usersTab">Users</button>
+      <button type="button" class="btn secondary" data-tab="paymentsTab">Payments</button>
     </div>
-
-
-
-    <!-- BUSINESSES -->
-
-    <section id="businessTab">
-
-      <h2>Businesses</h2>
-
-      <div id="businessTable">
-        Loading...
-      </div>
-
-    </section>
-
-
-
-    <!-- USERS -->
-
-    <section
-      id="usersTab"
-      class="hidden"
-    >
-
-      <h2>Users</h2>
-
-      <div id="userTable">
-        Loading...
-      </div>
-
-    </section>
-
-
-
-    <!-- PAYMENTS -->
-
-    <section
-      id="paymentsTab"
-      class="hidden"
-    >
-
-      <h2>Payments</h2>
-
-      <div id="paymentTable">
-        Loading...
-      </div>
-
-    </section>
-
-
-  </main>
-
-
-  <!-- ONLY ONE JAVASCRIPT FILE -->
-
-  <script
-    type="module"
-    src="./admin.js"
-  ></script>
-
-
-</body>
-
-</html>
+  </section>
+  <section id="businessTab" class="panel" style="padding:20px;margin-top:18px"><h2>Businesses</h2><input id="businessSearch" placeholder="Search businesses..." style="max-width:420px"><div id="businessTable">Loading...</div></section>
+  <section id="usersTab" class="panel hidden" style="padding:20px;margin-top:18px"><h2>Users</h2><input id="userSearch" placeholder="Search users..." style="max-width:420px"><div id="userTable">Loading...</div></section>
+  <section id="paymentsTab" class="panel hidden" style="padding:20px;margin-top:18px"><h2>Payments</h2><div id="paymentTable">Loading...</div></section>
+</main>
+<script type="module" src="./admin.js"></script>
+</body></html>

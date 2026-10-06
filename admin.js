@@ -301,6 +301,11 @@ async function load() {
     const payments =
       paymentsResult.data || [];
 
+    const bterm = (document.querySelector("#businessSearch")?.value || "").trim().toLowerCase();
+    const uterm = (document.querySelector("#userSearch")?.value || "").trim().toLowerCase();
+    const visibleBusinesses = bterm ? businesses.filter(b => `${b.business_name||""} ${b.area||""} ${b.city||""}`.toLowerCase().includes(bterm)) : businesses;
+    const visibleUsers = uterm ? users.filter(u => `${u.first_name||""} ${u.last_name||""} ${u.phone||""} ${u.account_type||""}`.toLowerCase().includes(uterm)) : users;
+
 
     // ====================================
     // STATS
@@ -369,7 +374,7 @@ async function load() {
           <tbody>
 
             ${
-              businesses.map(
+              visibleBusinesses.map(
                 business => `
 
                   <tr>
@@ -524,7 +529,7 @@ async function load() {
           <tbody>
 
             ${
-              users.map(
+              visibleUsers.map(
                 user => `
 
                   <tr>
@@ -989,6 +994,9 @@ document
 
   });
 
+
+document.querySelector("#businessSearch")?.addEventListener("input", load);
+document.querySelector("#userSearch")?.addEventListener("input", load);
 
 // ========================================
 // START

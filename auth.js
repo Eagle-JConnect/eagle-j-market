@@ -1,7 +1,7 @@
 import {supabase,supabaseConfigured} from './supabase.js';
-import {nav,user,profile} from './utils.js';
+import {nav,user,profile,bootGlobalUI} from './utils.js';
 
-document.querySelector('#nav').innerHTML=nav();
+document.querySelector('#nav').innerHTML=nav();bootGlobalUI();
 const msg=document.querySelector('#msg');
 function show(t,ok=false){msg.textContent=t;msg.className='message show '+(ok?'ok':'');}
 const form=document.querySelector('#form');

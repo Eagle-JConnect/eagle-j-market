@@ -88,34 +88,10 @@ function translateNode(root=document){
 }
 export function applyLanguage(){ translateNode(document); const s=document.querySelector("#languageSelect"); if(s) s.value=getLanguage(); }
 let languageInitialized=false;
-let languageObserver=null;
-let languageQueued=false;
 
 export function initLanguage(){
   if(languageInitialized) return;
-  if(!document.querySelector("#languageSelect")) return;
   languageInitialized=true;
-
   applyLanguage();
-
-  languageObserver=new MutationObserver(mutations=>{
-    if(languageQueued) return;
-    const hasAddedNodes=mutations.some(m=>m.addedNodes && m.addedNodes.length);
-    if(!hasAddedNodes) return;
-
-    languageQueued=true;
-    requestAnimationFrame(()=>{
-      languageQueued=false;
-      for(const mutation of mutations){
-        for(const node of mutation.addedNodes || []){
-          if(node.nodeType===Node.ELEMENT_NODE || node.nodeType===Node.TEXT_NODE){
-            translateNode(node.nodeType===Node.TEXT_NODE ? node.parentElement : node);
-          }
-        }
-      }
-    });
-  });
-
-  languageObserver.observe(document.body,{childList:true,subtree:true});
-  window.addEventListener("eaglej-language-change",applyLanguage);
+  window.addEventListener("eaglej-language-change", applyLanguage, {passive:true});
 }

@@ -1,457 +1,353 @@
-<!DOCTYPE html>
-<html lang="en">
+import { supabase } from "./supabase.js";
 
-<head>
-
-  <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title>
-    EAGLE-J MARKET — Admin Dashboard
-  </title>
-
-  <link
-    rel="stylesheet"
-    href="./style.css"
-  >
-
-</head>
+import {
+  nav,
+  requireAuth,
+  profile,
+  logout,
+  esc,
+  toast
+} from "./utils.js";
 
 
-<body>
+// ========================================
+// CHECK SUPABASE
+// ========================================
 
-
-  <!-- NAVIGATION -->
-
-  <div id="nav"></div>
-
-
-  <main class="container">
-
-
-    <!-- ADMIN HEADER -->
-
-    <section class="admin-header">
-
-      <div>
-
-        <h1>
-          Admin Dashboard
-        </h1>
-
+if (!supabase) {
+  document.body.innerHTML = `
+    <main class="container">
+      <section class="card">
+        <h2>Connection Error</h2>
         <p>
-          Manage EAGLE-J MARKET
+          Supabase is not configured correctly.
+          Please check your config.js file.
         </p>
+      </section>
+    </main>
+  `;
 
-      </div>
+  throw new Error("Supabase is not configured.");
+}
 
 
-      <button
-        type="button"
-        id="logout"
-        class="btn danger"
-      >
-        Logout
-      </button>
+// ========================================
+// NAVIGATION
+// ========================================
 
-    </section>
+const navElement = document.querySelector("#nav");
 
+if (navElement) {
+  navElement.innerHTML = nav();
+}
 
 
-    <!-- STATS -->
+// ========================================
+// LOGOUT
+// ========================================
 
-    <section class="stats">
+const logoutButton =
+  document.querySelector("#logout");
 
+if (logoutButton) {
 
-      <div class="card">
+  logoutButton.addEventListener(
+    "click",
+    async () => {
 
-        <h3>
-          Users
-        </h3>
+      console.log(
+        "EAGLE-J MARKET: Logout button clicked"
+      );
 
-        <strong id="users">
-          0
-        </strong>
+      logoutButton.disabled = true;
 
-      </div>
+      logoutButton.textContent =
+        "Logging out...";
 
+      try {
 
-      <div class="card">
+        const result =
+          await logout();
 
-        <h3>
-          Pending Businesses
-        </h3>
+        console.log(
+          "Logout result:",
+          result
+        );
 
-        <strong id="pending">
-          0
-        </strong>
 
-      </div>
+        if (
+          result &&
+          result.success === false
+        ) {
 
+          console.error(
+            "Logout failed:",
+            result.error
+          );
 
-      <div class="card">
+          logoutButton.disabled =
+            false;
 
-        <h3>
-          Total Businesses
-        </h3>
+          logoutButton.textContent =
+            "Logout";
 
-        <strong id="businesses">
-          0
-        </strong>
+          alert(
+            "Logout failed. Please try again."
+          );
 
-      </div>
+          return;
+        }
 
 
-      <div class="card">
+        console.log(
+          "EAGLE-J MARKET: Logout successful"
+        );
 
-        <h3>
-          Pending Payments
-        </h3>
 
-        <strong id="payments">
-          0
-        </strong>
+        // Make sure local session is cleared
+        await supabase.auth.signOut();
 
-      </div>
 
+        // Go to login page
+        window.location.replace(
+          "./login.html"
+        );
 
-    </section>
+      } catch (error) {
 
+        console.error(
+          "Logout error:",
+          error
+        );
 
+        logoutButton.disabled =
+          false;
 
-    <!-- ADMIN TABS -->
+        logoutButton.textContent =
+          "Logout";
 
-    <div class="admin-nav">
+        alert(
+          "An error occurred while logging out."
+        );
+      }
 
+    }
+  );
 
-      <button
-        type="button"
-        class="btn"
-        data-tab="businessTab"
-      >
-        Businesses
-      </button>
+}
 
 
-      <button
-        type="button"
-        class="btn"
-        data-tab="usersTab"
-      >
-        Users
-      </button>
+// ========================================
+// AUTHENTICATION
+// ========================================
 
+const currentUser =
+  await requireAuth();
 
-      <button
-        type="button"
-        class="btn"
-        data-tab="paymentsTab"
-      >
-        Payments
-      </button>
+if (!currentUser) {
 
+  throw new Error(
+    "User is not authenticated."
+  );
 
-    </div>
+}
 
 
+// ========================================
+// ADMIN CHECK
+// ========================================
 
-    <!-- BUSINESSES -->
+const currentProfile =
+  await profile();
 
-    <section id="businessTab">
 
-      <h2>
-        Businesses
-      </h2>
+if (
+  !currentProfile ||
+  currentProfile.account_type !== "admin"
+) {
 
-      <div id="businessTable">
-        Loading...
-      </div>
+  window.location.replace(
+    "./dashboard.html"
+  );
 
-    </section>
+  throw new Error(
+    "Admin access required."
+  );
 
+}
 
 
-    <!-- USERS -->
+// ========================================
+// ELEMENTS
+// ========================================
 
-    <section
-      id="usersTab"
-      class="hidden"
-    >
+const usersEl =
+  document.querySelector("#users");
 
-      <h2>
-        Users
-      </h2>
+const pendingEl =
+  document.querySelector("#pending");
 
-      <div id="userTable">
-        Loading...
-      </div>
+const businessesEl =
+  document.querySelector("#businesses");
 
-    </section>
+const paymentsEl =
+  document.querySelector("#payments");
 
+const businessTable =
+  document.querySelector("#businessTable");
 
+const userTable =
+  document.querySelector("#userTable");
 
-    <!-- PAYMENTS -->
+const paymentTable =
+  document.querySelector("#paymentTable");
 
-    <section
-      id="paymentsTab"
-      class="hidden"
-    >
 
-      <h2>
-        Payments
-      </h2>
+// ========================================
+// LOAD DASHBOARD
+// ========================================
 
-      <div id="paymentTable">
-        Loading...
-      </div>
+async function load() {
 
-    </section>
+  try {
 
+    const [
 
-  </main>
+      usersResult,
+      businessesResult,
+      paymentsResult
 
+    ] = await Promise.all([
 
-
-  <!-- JAVASCRIPT -->
-
-  <script type="module">
-
-
-    import {
+      // USERS
       supabase
-    } from "./supabase.js";
+        .from("profiles")
+        .select("*")
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        ),
+
+      // BUSINESSES
+      supabase
+        .from("businesses")
+        .select(
+          "*,categories(name)"
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        ),
+
+      // PAYMENTS
+      supabase
+        .from("payments")
+        .select(
+          "*,businesses(business_name)"
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        )
+
+    ]);
 
 
-    import {
-      nav,
-      requireAuth,
-      profile,
-      logout,
-      esc,
-      toast
-    } from "./utils.js";
+    // ====================================
+    // CHECK ERRORS
+    // ====================================
 
+    if (usersResult.error) {
 
+      console.error(
+        "Users error:",
+        usersResult.error
+      );
 
-    /* =========================
-       NAV
-    ========================= */
+    }
 
-    document
-      .querySelector("#nav")
-      .innerHTML = nav();
+    if (businessesResult.error) {
 
+      console.error(
+        "Businesses error:",
+        businessesResult.error
+      );
 
+    }
 
-    /* =========================
-       AUTH
-    ========================= */
+    if (paymentsResult.error) {
 
-    const currentUser =
-      await requireAuth();
-
-
-    if (!currentUser) {
-
-      throw new Error(
-        "User is not authenticated."
+      console.error(
+        "Payments error:",
+        paymentsResult.error
       );
 
     }
 
 
+    const U =
+      usersResult.data || [];
 
-    /* =========================
-       ADMIN CHECK
-    ========================= */
+    const B =
+      businessesResult.data || [];
 
-    const currentProfile =
-      await profile();
-
-
-    if (
-      !currentProfile ||
-      currentProfile.account_type !== "admin"
-    ) {
-
-      window.location.replace(
-        "dashboard.html"
-      );
-
-      throw new Error(
-        "Admin access required."
-      );
-
-    }
+    const P =
+      paymentsResult.data || [];
 
 
+    // ====================================
+    // STATS
+    // ====================================
 
-    /* =========================
-       ELEMENTS
-    ========================= */
-
-    const usersEl =
-      document.querySelector("#users");
-
-    const pendingEl =
-      document.querySelector("#pending");
-
-    const businessesEl =
-      document.querySelector("#businesses");
-
-    const paymentsEl =
-      document.querySelector("#payments");
-
-
-    const businessTable =
-      document.querySelector(
-        "#businessTable"
-      );
-
-    const userTable =
-      document.querySelector(
-        "#userTable"
-      );
-
-    const paymentTable =
-      document.querySelector(
-        "#paymentTable"
-      );
-
-
-
-    /* =========================
-       LOAD DASHBOARD
-    ========================= */
-
-    async function load() {
-
-
-      const [
-
-        usersResult,
-        businessesResult,
-        paymentsResult
-
-      ] = await Promise.all([
-
-
-        supabase
-          .from("profiles")
-          .select("*")
-          .order(
-            "created_at",
-            {
-              ascending: false
-            }
-          ),
-
-
-        supabase
-          .from("businesses")
-          .select(
-            "*,categories(name)"
-          )
-          .order(
-            "created_at",
-            {
-              ascending: false
-            }
-          ),
-
-
-        supabase
-          .from("payments")
-          .select(
-            "*,businesses(business_name)"
-          )
-          .order(
-            "created_at",
-            {
-              ascending: false
-            }
-          )
-
-      ]);
-
-
-
-      if (usersResult.error) {
-
-        console.error(
-          "Users error:",
-          usersResult.error
-        );
-
-      }
-
-
-      if (businessesResult.error) {
-
-        console.error(
-          "Businesses error:",
-          businessesResult.error
-        );
-
-      }
-
-
-      if (paymentsResult.error) {
-
-        console.error(
-          "Payments error:",
-          paymentsResult.error
-        );
-
-      }
-
-
-
-      const U =
-        usersResult.data || [];
-
-
-      const B =
-        businessesResult.data || [];
-
-
-      const P =
-        paymentsResult.data || [];
-
-
-
-      /* =========================
-         STATS
-      ========================= */
+    if (usersEl) {
 
       usersEl.textContent =
         U.length;
 
+    }
+
+
+    if (pendingEl) {
 
       pendingEl.textContent =
         B.filter(
-          x => x.status === "pending"
+          x =>
+            x.status === "pending"
         ).length;
 
+    }
+
+
+    if (businessesEl) {
 
       businessesEl.textContent =
         B.length;
 
+    }
+
+
+    if (paymentsEl) {
 
       paymentsEl.textContent =
         P.filter(
-          x => x.status === "pending"
+          x =>
+            x.status === "pending"
         ).length;
 
+    }
 
 
-      /* =========================
-         BUSINESS TABLE
-      ========================= */
+    // ====================================
+    // BUSINESSES TABLE
+    // ====================================
+
+    if (businessTable) {
 
       businessTable.innerHTML = `
 
@@ -461,30 +357,19 @@
 
             <tr>
 
-              <th>
-                Business
-              </th>
+              <th>Business</th>
 
-              <th>
-                Category
-              </th>
+              <th>Category</th>
 
-              <th>
-                Status
-              </th>
+              <th>Status</th>
 
-              <th>
-                Plan
-              </th>
+              <th>Plan</th>
 
-              <th>
-                Action
-              </th>
+              <th>Action</th>
 
             </tr>
 
           </thead>
-
 
           <tbody>
 
@@ -532,7 +417,7 @@
                     >
 
                       ${esc(
-                        x.status
+                        x.status || ""
                       )}
 
                     </span>
@@ -541,18 +426,18 @@
 
 
                   <td>
+
                     ${esc(
                       x.plan || ""
                     )}
+
                   </td>
 
 
                   <td>
 
-
                     ${
                       x.status === "pending"
-
                         ? `
 
                           <button
@@ -563,7 +448,6 @@
                             Approve
                           </button>
 
-
                           <button
                             type="button"
                             class="btn small danger"
@@ -573,14 +457,12 @@
                           </button>
 
                         `
-
                         : ""
                     }
 
 
                     ${
                       x.status === "approved"
-
                         ? `
 
                           <button
@@ -598,10 +480,8 @@
                           </button>
 
                         `
-
                         : ""
                     }
-
 
                   </td>
 
@@ -616,11 +496,14 @@
 
       `;
 
+    }
 
 
-      /* =========================
-         USERS TABLE
-      ========================= */
+    // ====================================
+    // USERS TABLE
+    // ====================================
+
+    if (userTable) {
 
       userTable.innerHTML = `
 
@@ -630,26 +513,17 @@
 
             <tr>
 
-              <th>
-                Name
-              </th>
+              <th>Name</th>
 
-              <th>
-                Phone
-              </th>
+              <th>Phone</th>
 
-              <th>
-                Type
-              </th>
+              <th>Type</th>
 
-              <th>
-                Status
-              </th>
+              <th>Status</th>
 
             </tr>
 
           </thead>
-
 
           <tbody>
 
@@ -708,11 +582,14 @@
 
       `;
 
+    }
 
 
-      /* =========================
-         PAYMENT TABLE
-      ========================= */
+    // ====================================
+    // PAYMENTS TABLE
+    // ====================================
+
+    if (paymentTable) {
 
       paymentTable.innerHTML = `
 
@@ -722,30 +599,19 @@
 
             <tr>
 
-              <th>
-                Business
-              </th>
+              <th>Business</th>
 
-              <th>
-                Amount
-              </th>
+              <th>Amount</th>
 
-              <th>
-                Type
-              </th>
+              <th>Type</th>
 
-              <th>
-                Status
-              </th>
+              <th>Status</th>
 
-              <th>
-                Action
-              </th>
+              <th>Action</th>
 
             </tr>
 
           </thead>
-
 
           <tbody>
 
@@ -793,10 +659,8 @@
 
                   <td>
 
-
                     ${
                       x.status === "pending"
-
                         ? `
 
                           <button
@@ -808,10 +672,8 @@
                           </button>
 
                         `
-
                         : ""
                     }
-
 
                   </td>
 
@@ -826,306 +688,323 @@
 
       `;
 
-
-
-      /* =========================
-         APPROVE
-      ========================= */
-
-      document
-        .querySelectorAll(
-          "[data-approve]"
-        )
-        .forEach(button => {
-
-          button.onclick =
-            async () => {
-
-              const result =
-                await supabase
-                  .from("businesses")
-                  .update({
-                    status:
-                      "approved",
-                    verified:
-                      true
-                  })
-                  .eq(
-                    "id",
-                    button.dataset
-                      .approve
-                  );
-
-
-              toast(
-                result.error
-                  ?.message ||
-                  "Business approved",
-                !result.error
-              );
-
-
-              if (!result.error) {
-                await load();
-              }
-
-            };
-
-        });
-
-
-
-      /* =========================
-         REJECT
-      ========================= */
-
-      document
-        .querySelectorAll(
-          "[data-reject]"
-        )
-        .forEach(button => {
-
-          button.onclick =
-            async () => {
-
-              const result =
-                await supabase
-                  .from("businesses")
-                  .update({
-                    status:
-                      "rejected"
-                  })
-                  .eq(
-                    "id",
-                    button.dataset
-                      .reject
-                  );
-
-
-              toast(
-                result.error
-                  ?.message ||
-                  "Business rejected",
-                !result.error
-              );
-
-
-              if (!result.error) {
-                await load();
-              }
-
-            };
-
-        });
-
-
-
-      /* =========================
-         FEATURE
-      ========================= */
-
-      document
-        .querySelectorAll(
-          "[data-feature]"
-        )
-        .forEach(button => {
-
-          button.onclick =
-            async () => {
-
-              const business =
-                B.find(
-                  x =>
-                    x.id ===
-                    button.dataset
-                      .feature
-                );
-
-
-              if (!business)
-                return;
-
-
-              const result =
-                await supabase
-                  .from("businesses")
-                  .update({
-                    featured:
-                      !business.featured
-                  })
-                  .eq(
-                    "id",
-                    business.id
-                  );
-
-
-              toast(
-                result.error
-                  ?.message ||
-                  (
-                    business.featured
-                      ? "Business unfeatured"
-                      : "Business featured"
-                  ),
-                !result.error
-              );
-
-
-              if (!result.error) {
-                await load();
-              }
-
-            };
-
-        });
-
-
-
-      /* =========================
-         MARK PAYMENT PAID
-      ========================= */
-
-      document
-        .querySelectorAll(
-          "[data-pay]"
-        )
-        .forEach(button => {
-
-          button.onclick =
-            async () => {
-
-              const payment =
-                P.find(
-                  x =>
-                    x.id ===
-                    button.dataset
-                      .pay
-                );
-
-
-              if (!payment)
-                return;
-
-
-              const result =
-                await supabase
-                  .from("payments")
-                  .update({
-                    status:
-                      "paid"
-                  })
-                  .eq(
-                    "id",
-                    payment.id
-                  );
-
-
-              toast(
-                result.error
-                  ?.message ||
-                  "Payment marked paid",
-                !result.error
-              );
-
-
-              if (!result.error) {
-                await load();
-              }
-
-            };
-
-        });
-
     }
 
 
-
-    /* =========================
-       TABS
-    ========================= */
+    // ====================================
+    // APPROVE BUSINESS
+    // ====================================
 
     document
       .querySelectorAll(
-        ".admin-nav button[data-tab]"
+        "[data-approve]"
       )
       .forEach(button => {
 
-        button.onclick = () => {
+        button.onclick =
+          async () => {
+
+            button.disabled = true;
+
+            const result =
+              await supabase
+                .from("businesses")
+                .update({
+                  status:
+                    "approved",
+                  verified:
+                    true
+                })
+                .eq(
+                  "id",
+                  button.dataset.approve
+                );
 
 
-          [
-            "businessTab",
-            "usersTab",
-            "paymentsTab"
-
-          ].forEach(id => {
-
-            document
-              .querySelector(
-                "#" + id
-              )
-              .classList
-              .add("hidden");
-
-          });
+            toast(
+              result.error?.message ||
+              "Business approved",
+              !result.error
+            );
 
 
-          document
-            .querySelector(
-              "#" +
-              button.dataset.tab
-            )
-            .classList
-            .remove("hidden");
+            if (!result.error) {
 
-        };
+              await load();
+
+            } else {
+
+              button.disabled =
+                false;
+
+            }
+
+          };
 
       });
 
 
+    // ====================================
+    // REJECT BUSINESS
+    // ====================================
 
-    /* =========================
-       LOGOUT BUTTON
-    ========================= */
+    document
+      .querySelectorAll(
+        "[data-reject]"
+      )
+      .forEach(button => {
 
-    const logoutButton =
-      document.querySelector(
-        "#logout"
-      );
+        button.onclick =
+          async () => {
+
+            button.disabled = true;
+
+            const result =
+              await supabase
+                .from("businesses")
+                .update({
+                  status:
+                    "rejected"
+                })
+                .eq(
+                  "id",
+                  button.dataset.reject
+                );
 
 
-    if (logoutButton) {
-
-      logoutButton.addEventListener(
-        "click",
-        async function(event) {
-
-          logoutButton.disabled =
-            true;
-
-          logoutButton.textContent =
-            "Logging out...";
+            toast(
+              result.error?.message ||
+              "Business rejected",
+              !result.error
+            );
 
 
-          await logout(event);
+            if (!result.error) {
+
+              await load();
+
+            } else {
+
+              button.disabled =
+                false;
+
+            }
+
+          };
+
+      });
+
+
+    // ====================================
+    // FEATURE BUSINESS
+    // ====================================
+
+    document
+      .querySelectorAll(
+        "[data-feature]"
+      )
+      .forEach(button => {
+
+        button.onclick =
+          async () => {
+
+            const business =
+              B.find(
+                x =>
+                  x.id ===
+                  button.dataset.feature
+              );
+
+
+            if (!business)
+              return;
+
+
+            button.disabled = true;
+
+
+            const result =
+              await supabase
+                .from("businesses")
+                .update({
+                  featured:
+                    !business.featured
+                })
+                .eq(
+                  "id",
+                  business.id
+                );
+
+
+            toast(
+              result.error?.message ||
+              (
+                business.featured
+                  ? "Business unfeatured"
+                  : "Business featured"
+              ),
+              !result.error
+            );
+
+
+            if (!result.error) {
+
+              await load();
+
+            } else {
+
+              button.disabled =
+                false;
+
+            }
+
+          };
+
+      });
+
+
+    // ====================================
+    // MARK PAYMENT PAID
+    // ====================================
+
+    document
+      .querySelectorAll(
+        "[data-pay]"
+      )
+      .forEach(button => {
+
+        button.onclick =
+          async () => {
+
+            const payment =
+              P.find(
+                x =>
+                  x.id ===
+                  button.dataset.pay
+              );
+
+
+            if (!payment)
+              return;
+
+
+            button.disabled = true;
+
+
+            const result =
+              await supabase
+                .from("payments")
+                .update({
+                  status:
+                    "paid"
+                })
+                .eq(
+                  "id",
+                  payment.id
+                );
+
+
+            toast(
+              result.error?.message ||
+              "Payment marked paid",
+              !result.error
+            );
+
+
+            if (!result.error) {
+
+              await load();
+
+            } else {
+
+              button.disabled =
+                false;
+
+            }
+
+          };
+
+      });
+
+
+  } catch (error) {
+
+    console.error(
+      "Dashboard load error:",
+      error
+    );
+
+    toast(
+      "Unable to load admin dashboard."
+    );
+
+  }
+
+}
+
+
+// ========================================
+// ADMIN TABS
+// ========================================
+
+document
+  .querySelectorAll(
+    ".admin-nav button[data-tab]"
+  )
+  .forEach(button => {
+
+    button.onclick = () => {
+
+      const tabs = [
+        "businessTab",
+        "usersTab",
+        "paymentsTab"
+      ];
+
+
+      tabs.forEach(id => {
+
+        const section =
+          document.querySelector(
+            "#" + id
+          );
+
+        if (section) {
+
+          section.classList.add(
+            "hidden"
+          );
 
         }
-      );
 
-    }
-
+      });
 
 
-    /* =========================
-       START
-    ========================= */
-
-    await load();
-
-
-  </script>
+      const selected =
+        document.querySelector(
+          "#" + button.dataset.tab
+        );
 
 
-</body>
+      if (selected) {
 
-</html>
+        selected.classList.remove(
+          "hidden"
+        );
+
+      }
+
+    };
+
+  });
+
+
+// ========================================
+// START DASHBOARD
+// ========================================
+
+await load();
+
+console.log(
+  "EAGLE-J MARKET Admin Dashboard loaded successfully."
+);

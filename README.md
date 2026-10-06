@@ -1,119 +1,32 @@
-# 🦅 EAGLE-J MARKET V1
+# EAGLE-J MARKET — Final GitHub/Supabase Edition
 
-**Find It • Promote It • Sell It**
+A Nassau/Bahamas local marketplace: **Find It • Promote It • Sell It**.
 
-EAGLE-J MARKET is a mobile-first local marketplace starter project for Nassau, Bahamas.
+## Included
+- Customer registration/login/profile
+- Business owner registration and dashboard
+- Business approval workflow
+- Products and deals
+- Search, categories, business pages
+- WhatsApp, phone and Google Maps links
+- Favorites and reviews data model
+- Admin dashboard for users, businesses and payment requests
+- Free/Starter/Business/VIP plan request flow
+- Supabase RLS database schema
+- GitHub Pages flat-file deployment
 
-## V1 includes
+## Supabase setup
+1. Open Supabase SQL Editor.
+2. Run `schema.sql` once.
+3. If this is a fresh project, run `admin-bootstrap.sql` after creating your first account and replace the placeholder email with your admin email.
+4. Authentication → URL Configuration: set Site URL to your GitHub Pages URL, e.g. `https://eagle-jconnect.github.io/eagle-j-market/`.
+5. If email confirmation is enabled, users must confirm before login.
 
-- Homepage
-- Business discovery
-- Categories
-- Products
-- Deals
-- Customer registration/login
-- Business owner registration
-- Customer dashboard
-- Business dashboard starter
-- Admin dashboard starter
-- Pricing page
-- Supabase schema + RLS policies
-- Demo data when Supabase is not configured
+## GitHub setup
+Upload all files to the root of the `eagle-j-market` repository. GitHub Pages should use branch `main` and folder `/ (root)`.
 
-## 1. Upload to GitHub
+## Security
+`config.js` contains only the public Publishable key. Never put a `sb_secret_...`, service-role, database password or other privileged credential in GitHub.
 
-Create a new repository, for example:
-
-`eagle-j-market`
-
-Upload the contents of this folder to the repository root.
-
-The repository should have `index.html` in the root.
-
-## 2. Configure Supabase
-
-Open:
-
-`config.js`
-
-Replace:
-
-`https://dtojgohoppccwvcjslwb.supabase.co`
-
-and
-
-`your publishable key`
-
-with the Supabase project URL and the public anon key.
-
-Never place a `service_role` key in this project.
-
-## 3. Create the database
-
-In Supabase:
-
-SQL Editor → New Query
-
-Copy/paste:
-
-`schema.sql`
-
-Run it.
-
-## 4. Authentication
-
-Supabase → Authentication → Providers → Email
-
-Enable Email according to your preferred confirmation settings.
-
-For production, configure your Site URL and Redirect URLs to your real GitHub Pages/domain URL.
-
-## 5. Storage
-
-Create these private/public buckets according to your final security design:
-
-- business-images
-- product-images
-- deal-images
-- profile-images
-- advertisement-images
-
-Storage policies should be added before production uploads are enabled.
-
-## 6. GitHub Pages
-
-Repository → Settings → Pages
-
-- Source: Deploy from a branch
-- Branch: main
-- Folder: / (root)
-
-Save.
-
-Your site will normally be available at:
-
-`https://YOUR-USERNAME.github.io/eagle-j-market/`
-
-## Important V1 limitations
-
-Payments are NOT activated. Pricing is display-only until a payment provider is connected.
-
-Admin page is a UI starter. Production admin authorization must be enforced by Supabase RLS/server-side checks.
-
-Demo listings appear when Supabase is not configured.
-
-## Recommended next build
-
-1. Business creation form
-2. Product/deal creation forms
-3. Admin approval workflow
-4. Storage upload policies
-5. Favorites/reviews
-6. Analytics
-7. Payment provider
-8. Advertising/boost system
-9. Final mobile QA
-
-
-## GitHub upload version
-All project files are intentionally in the repository root for easier upload from GitHub/mobile. Do not recreate css/js/sql folders for this version.
+## Payments
+The included plan buttons create a payment request record. A real Stripe/PayPal checkout requires provider credentials and a secure backend/webhook; do not put those secret credentials in GitHub Pages.

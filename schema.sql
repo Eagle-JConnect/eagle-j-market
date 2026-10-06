@@ -1,318 +1,34 @@
--- EAGLE-J MARKET V1
--- Run this in Supabase SQL Editor.
--- IMPORTANT: Review policies before production use.
-
 create extension if not exists pgcrypto;
 
-create table if not exists public.profiles (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid unique references auth.users(id) on delete cascade,
-  first_name text not null,
-  last_name text not null,
-  phone text,
-  avatar_url text,
-  account_type text not null default 'customer' check (account_type in ('customer','business','admin')),
-  status text not null default 'active' check (status in ('active','suspended')),
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
+create table if not exists public.profiles(id uuid primary key default gen_random_uuid(),user_id uuid unique references auth.users(id) on delete cascade,first_name text not null default '',last_name text not null default '',phone text,avatar_url text,account_type text not null default 'customer' check(account_type in('customer','business','admin')),status text not null default 'active' check(status in('active','suspended')),created_at timestamptz not null default now(),updated_at timestamptz not null default now());
+create table if not exists public.categories(id uuid primary key default gen_random_uuid(),name text unique not null,slug text unique not null,description text,icon text,image_url text,active boolean not null default true,created_at timestamptz not null default now());
+create table if not exists public.businesses(id uuid primary key default gen_random_uuid(),owner_id uuid not null references auth.users(id) on delete cascade,business_name text not null,slug text unique,category_id uuid references public.categories(id),description text,phone text,whatsapp text,email text,website text,address text,city text default 'Nassau',country text default 'Bahamas',area text,latitude double precision,longitude double precision,logo_url text,cover_image_url text,opening_hours jsonb, status text not null default 'pending' check(status in('pending','approved','rejected','suspended')),plan text not null default 'free' check(plan in('free','starter','business','vip')),featured boolean not null default false,verified boolean not null default false,created_at timestamptz not null default now(),updated_at timestamptz not null default now());
+create table if not exists public.products(id uuid primary key default gen_random_uuid(),business_id uuid not null references public.businesses(id) on delete cascade,category_id uuid references public.categories(id),name text not null,description text,price numeric(12,2),currency text not null default 'USD',image_url text,stock_status text not null default 'available' check(stock_status in('available','unavailable')),status text not null default 'active' check(status in('active','hidden','removed')),featured boolean not null default false,created_at timestamptz not null default now(),updated_at timestamptz not null default now());
+create table if not exists public.deals(id uuid primary key default gen_random_uuid(),business_id uuid not null references public.businesses(id) on delete cascade,title text not null,description text,original_price numeric(12,2),deal_price numeric(12,2),image_url text,start_date timestamptz,end_date timestamptz,status text not null default 'draft' check(status in('draft','active','expired','removed')),featured boolean not null default false,views integer not null default 0,created_at timestamptz not null default now());
+create table if not exists public.reviews(id uuid primary key default gen_random_uuid(),business_id uuid not null references public.businesses(id) on delete cascade,user_id uuid not null references auth.users(id) on delete cascade,rating integer not null check(rating between 1 and 5),comment text,status text not null default 'published' check(status in('published','hidden','removed')),created_at timestamptz not null default now(),unique(business_id,user_id));
+create table if not exists public.favorites(id uuid primary key default gen_random_uuid(),user_id uuid not null references auth.users(id) on delete cascade,business_id uuid not null references public.businesses(id) on delete cascade,created_at timestamptz not null default now(),unique(user_id,business_id));
+create table if not exists public.advertisements(id uuid primary key default gen_random_uuid(),business_id uuid not null references public.businesses(id) on delete cascade,title text not null,image_url text,destination_url text,placement text not null default 'homepage',start_date timestamptz,end_date timestamptz,status text not null default 'pending' check(status in('pending','active','paused','expired','rejected')),budget numeric(12,2) default 0,views integer not null default 0,clicks integer not null default 0,created_at timestamptz not null default now());
+create table if not exists public.subscriptions(id uuid primary key default gen_random_uuid(),business_id uuid not null references public.businesses(id) on delete cascade,plan text not null check(plan in('free','starter','business','vip')),price numeric(12,2) not null default 0,currency text not null default 'USD',status text not null default 'inactive' check(status in('active','inactive','past_due','cancelled')),started_at timestamptz,expires_at timestamptz,payment_provider text,provider_subscription_id text,created_at timestamptz not null default now());
+create table if not exists public.payments(id uuid primary key default gen_random_uuid(),user_id uuid references auth.users(id) on delete set null,business_id uuid references public.businesses(id) on delete set null,amount numeric(12,2) not null,currency text not null default 'USD',payment_type text not null check(payment_type in('subscription','featured_business','boost_deal','advertisement')),status text not null default 'pending' check(status in('pending','paid','failed','refunded')),provider text,transaction_id text unique,created_at timestamptz not null default now());
+create table if not exists public.notifications(id uuid primary key default gen_random_uuid(),user_id uuid not null references auth.users(id) on delete cascade,title text not null,message text not null,type text,read boolean not null default false,created_at timestamptz not null default now());
+insert into public.categories(name,slug,icon) values ('Restaurants','restaurants','🍔'),('Fashion','fashion','👗'),('Beauty','beauty','💇'),('Auto','auto','🚗'),('Home Services','home-services','🔧'),('Transportation','transportation','🚕'),('Electronics','electronics','📱'),('Hotels','hotels','🏨'),('Real Estate','real-estate','🏠'),('Professional Services','professional-services','💼'),('Grocery','grocery','🛒'),('Jobs','jobs','💼') on conflict(slug) do nothing;
+create or replace function public.is_admin() returns boolean language sql stable security definer set search_path=public as $$select exists(select 1 from public.profiles where user_id=auth.uid() and account_type='admin' and status='active')$$;
+create or replace function public.owns_business(p_business_id uuid) returns boolean language sql stable security definer set search_path=public as $$select exists(select 1 from public.businesses where id=p_business_id and owner_id=auth.uid())$$;
+create or replace function public.handle_new_user() returns trigger language plpgsql security definer set search_path=public as $$begin insert into public.profiles(user_id,first_name,last_name,phone,account_type) values(new.id,coalesce(new.raw_user_meta_data->>'first_name',''),coalesce(new.raw_user_meta_data->>'last_name',''),new.raw_user_meta_data->>'phone',case when new.raw_user_meta_data->>'account_type'='business' then 'business' else 'customer' end) on conflict(user_id) do nothing; return new; end;$$;
+drop trigger if exists on_auth_user_created on auth.users; create trigger on_auth_user_created after insert on auth.users for each row execute procedure public.handle_new_user();
+create or replace function public.set_updated_at() returns trigger language plpgsql as $$begin new.updated_at=now(); return new; end;$$;
+drop trigger if exists profiles_updated_at on public.profiles;create trigger profiles_updated_at before update on public.profiles for each row execute procedure public.set_updated_at();drop trigger if exists businesses_updated_at on public.businesses;create trigger businesses_updated_at before update on public.businesses for each row execute procedure public.set_updated_at();drop trigger if exists products_updated_at on public.products;create trigger products_updated_at before update on public.products for each row execute procedure public.set_updated_at();
+alter table public.profiles enable row level security;alter table public.categories enable row level security;alter table public.businesses enable row level security;alter table public.products enable row level security;alter table public.deals enable row level security;alter table public.reviews enable row level security;alter table public.favorites enable row level security;alter table public.advertisements enable row level security;alter table public.subscriptions enable row level security;alter table public.payments enable row level security;alter table public.notifications enable row level security;
 
-create table if not exists public.categories (
-  id uuid primary key default gen_random_uuid(),
-  name text unique not null,
-  slug text unique not null,
-  description text,
-  icon text,
-  image_url text,
-  active boolean not null default true,
-  created_at timestamptz not null default now()
-);
-
-create table if not exists public.businesses (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users(id) on delete cascade,
-  business_name text not null,
-  slug text unique,
-  category_id uuid references public.categories(id),
-  description text,
-  phone text,
-  whatsapp text,
-  email text,
-  website text,
-  address text,
-  city text default 'Nassau',
-  country text default 'Bahamas',
-  area text,
-  latitude double precision,
-  longitude double precision,
-  logo_url text,
-  cover_image_url text,
-  opening_hours jsonb,
-  status text not null default 'pending' check (status in ('pending','approved','rejected','suspended')),
-  plan text not null default 'free' check (plan in ('free','starter','business','vip')),
-  featured boolean not null default false,
-  verified boolean not null default false,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-
-create table if not exists public.products (
-  id uuid primary key default gen_random_uuid(),
-  business_id uuid not null references public.businesses(id) on delete cascade,
-  category_id uuid references public.categories(id),
-  name text not null,
-  description text,
-  price numeric(12,2),
-  currency text not null default 'USD',
-  image_url text,
-  stock_status text not null default 'available' check (stock_status in ('available','unavailable')),
-  status text not null default 'active' check (status in ('active','hidden','removed')),
-  featured boolean not null default false,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-
-create table if not exists public.deals (
-  id uuid primary key default gen_random_uuid(),
-  business_id uuid not null references public.businesses(id) on delete cascade,
-  title text not null,
-  description text,
-  original_price numeric(12,2),
-  deal_price numeric(12,2),
-  image_url text,
-  start_date timestamptz,
-  end_date timestamptz,
-  status text not null default 'draft' check (status in ('draft','active','expired','removed')),
-  featured boolean not null default false,
-  views integer not null default 0,
-  created_at timestamptz not null default now()
-);
-
-create table if not exists public.reviews (
-  id uuid primary key default gen_random_uuid(),
-  business_id uuid not null references public.businesses(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  rating integer not null check (rating between 1 and 5),
-  comment text,
-  status text not null default 'published' check (status in ('published','hidden','removed')),
-  created_at timestamptz not null default now(),
-  unique (business_id, user_id)
-);
-
-create table if not exists public.favorites (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  business_id uuid not null references public.businesses(id) on delete cascade,
-  created_at timestamptz not null default now(),
-  unique(user_id,business_id)
-);
-
-create table if not exists public.advertisements (
-  id uuid primary key default gen_random_uuid(),
-  business_id uuid not null references public.businesses(id) on delete cascade,
-  title text not null,
-  image_url text,
-  destination_url text,
-  placement text not null default 'homepage',
-  start_date timestamptz,
-  end_date timestamptz,
-  status text not null default 'pending' check (status in ('pending','active','paused','expired','rejected')),
-  budget numeric(12,2) default 0,
-  views integer not null default 0,
-  clicks integer not null default 0,
-  created_at timestamptz not null default now()
-);
-
-create table if not exists public.subscriptions (
-  id uuid primary key default gen_random_uuid(),
-  business_id uuid not null references public.businesses(id) on delete cascade,
-  plan text not null check (plan in ('free','starter','business','vip')),
-  price numeric(12,2) not null default 0,
-  currency text not null default 'USD',
-  status text not null default 'inactive' check (status in ('active','inactive','past_due','cancelled')),
-  started_at timestamptz,
-  expires_at timestamptz,
-  payment_provider text,
-  provider_subscription_id text,
-  created_at timestamptz not null default now()
-);
-
-create table if not exists public.payments (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users(id) on delete set null,
-  business_id uuid references public.businesses(id) on delete set null,
-  amount numeric(12,2) not null,
-  currency text not null default 'USD',
-  payment_type text not null check (payment_type in ('subscription','featured_business','boost_deal','advertisement')),
-  status text not null default 'pending' check (status in ('pending','paid','failed','refunded')),
-  provider text,
-  transaction_id text unique,
-  created_at timestamptz not null default now()
-);
-
-create table if not exists public.notifications (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  title text not null,
-  message text not null,
-  type text,
-  read boolean not null default false,
-  created_at timestamptz not null default now()
-);
-
--- Seed categories
-insert into public.categories (name,slug,icon) values
-('Restaurants','restaurants','🍔'),
-('Fashion','fashion','👗'),
-('Beauty','beauty','💇'),
-('Auto','auto','🚗'),
-('Home Services','home-services','🔧'),
-('Transportation','transportation','🚕'),
-('Electronics','electronics','📱'),
-('Hotels','hotels','🏨'),
-('Real Estate','real-estate','🏠'),
-('Professional Services','professional-services','💼'),
-('Grocery','grocery','🛒'),
-('Jobs','jobs','💼')
-on conflict (slug) do nothing;
-
--- Helper functions
-create or replace function public.is_admin()
-returns boolean
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1 from public.profiles
-    where user_id = auth.uid()
-      and account_type = 'admin'
-      and status = 'active'
-  );
-$$;
-
-create or replace function public.owns_business(p_business_id uuid)
-returns boolean
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1 from public.businesses
-    where id = p_business_id
-      and owner_id = auth.uid()
-  );
-$$;
-
--- New-user profile trigger
-create or replace function public.handle_new_user()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-  insert into public.profiles(user_id,first_name,last_name,phone,account_type)
-  values (
-    new.id,
-    coalesce(new.raw_user_meta_data->>'first_name',''),
-    coalesce(new.raw_user_meta_data->>'last_name',''),
-    new.raw_user_meta_data->>'phone',
-    case when new.raw_user_meta_data->>'account_type' = 'business' then 'business' else 'customer' end
-  )
-  on conflict(user_id) do nothing;
-  return new;
-end;
-$$;
-
-drop trigger if exists on_auth_user_created on auth.users;
-create trigger on_auth_user_created
-after insert on auth.users
-for each row execute procedure public.handle_new_user();
-
--- RLS
-alter table public.profiles enable row level security;
-alter table public.categories enable row level security;
-alter table public.businesses enable row level security;
-alter table public.products enable row level security;
-alter table public.deals enable row level security;
-alter table public.reviews enable row level security;
-alter table public.favorites enable row level security;
-alter table public.advertisements enable row level security;
-alter table public.subscriptions enable row level security;
-alter table public.payments enable row level security;
-alter table public.notifications enable row level security;
-
--- Profiles
-drop policy if exists "profiles_select_own_or_admin" on public.profiles;
-create policy "profiles_select_own_or_admin" on public.profiles for select using (user_id = auth.uid() or public.is_admin());
-drop policy if exists "profiles_update_own_or_admin" on public.profiles;
-create policy "profiles_update_own_or_admin" on public.profiles for update using (user_id = auth.uid() or public.is_admin()) with check (user_id = auth.uid() or public.is_admin());
-
--- Categories
-drop policy if exists "categories_public_read" on public.categories;
-create policy "categories_public_read" on public.categories for select using (active = true or public.is_admin());
-
--- Businesses
-drop policy if exists "businesses_public_read" on public.businesses;
-create policy "businesses_public_read" on public.businesses for select using (status = 'approved' or owner_id = auth.uid() or public.is_admin());
-drop policy if exists "businesses_owner_insert" on public.businesses;
-create policy "businesses_owner_insert" on public.businesses for insert with check (owner_id = auth.uid() or public.is_admin());
-drop policy if exists "businesses_owner_update" on public.businesses;
-create policy "businesses_owner_update" on public.businesses for update using (owner_id = auth.uid() or public.is_admin()) with check (owner_id = auth.uid() or public.is_admin());
-drop policy if exists "businesses_owner_delete" on public.businesses;
-create policy "businesses_owner_delete" on public.businesses for delete using (owner_id = auth.uid() or public.is_admin());
-
--- Products
-drop policy if exists "products_public_read" on public.products;
-create policy "products_public_read" on public.products for select using (
-  status = 'active' and exists(select 1 from public.businesses b where b.id=business_id and b.status='approved')
-  or public.owns_business(business_id) or public.is_admin()
-);
-drop policy if exists "products_owner_insert" on public.products;
-create policy "products_owner_insert" on public.products for insert with check (public.owns_business(business_id) or public.is_admin());
-drop policy if exists "products_owner_update" on public.products;
-create policy "products_owner_update" on public.products for update using (public.owns_business(business_id) or public.is_admin()) with check (public.owns_business(business_id) or public.is_admin());
-
--- Deals
-drop policy if exists "deals_public_read" on public.deals;
-create policy "deals_public_read" on public.deals for select using (
-  status = 'active' and exists(select 1 from public.businesses b where b.id=business_id and b.status='approved')
-  or public.owns_business(business_id) or public.is_admin()
-);
-drop policy if exists "deals_owner_insert" on public.deals;
-create policy "deals_owner_insert" on public.deals for insert with check (public.owns_business(business_id) or public.is_admin());
-drop policy if exists "deals_owner_update" on public.deals;
-create policy "deals_owner_update" on public.deals for update using (public.owns_business(business_id) or public.is_admin()) with check (public.owns_business(business_id) or public.is_admin());
-
--- Reviews
-drop policy if exists "reviews_public_read" on public.reviews;
-create policy "reviews_public_read" on public.reviews for select using (status='published' or user_id=auth.uid() or public.is_admin());
-drop policy if exists "reviews_insert_own" on public.reviews;
-create policy "reviews_insert_own" on public.reviews for insert with check (user_id=auth.uid());
-
--- Favorites
-drop policy if exists "favorites_own" on public.favorites;
-create policy "favorites_own" on public.favorites for all using (user_id=auth.uid()) with check (user_id=auth.uid());
-
--- Ads
-drop policy if exists "ads_public_read" on public.advertisements;
-create policy "ads_public_read" on public.advertisements for select using (status='active' or public.owns_business(business_id) or public.is_admin());
-drop policy if exists "ads_owner_insert" on public.advertisements;
-create policy "ads_owner_insert" on public.advertisements for insert with check (public.owns_business(business_id) or public.is_admin());
-drop policy if exists "ads_owner_update" on public.advertisements;
-create policy "ads_owner_update" on public.advertisements for update using (public.owns_business(business_id) or public.is_admin()) with check (public.owns_business(business_id) or public.is_admin());
-
--- Subscriptions
-drop policy if exists "subscriptions_owner_read" on public.subscriptions;
-create policy "subscriptions_owner_read" on public.subscriptions for select using (public.owns_business(business_id) or public.is_admin());
-
--- Payments
-drop policy if exists "payments_owner_read" on public.payments;
-create policy "payments_owner_read" on public.payments for select using (user_id=auth.uid() or public.is_admin());
-
--- Notifications
-drop policy if exists "notifications_own" on public.notifications;
-create policy "notifications_own" on public.notifications for select using (user_id=auth.uid() or public.is_admin());
+-- Policies: public reads, owner writes, admin override.
+drop policy if exists profiles_select on public.profiles;create policy profiles_select on public.profiles for select using(user_id=auth.uid() or public.is_admin());drop policy if exists profiles_update on public.profiles;create policy profiles_update on public.profiles for update using(user_id=auth.uid() or public.is_admin()) with check(user_id=auth.uid() or public.is_admin());
+drop policy if exists categories_read on public.categories;create policy categories_read on public.categories for select using(active=true or public.is_admin());
+drop policy if exists businesses_read on public.businesses;create policy businesses_read on public.businesses for select using(status='approved' or owner_id=auth.uid() or public.is_admin());drop policy if exists businesses_insert on public.businesses;create policy businesses_insert on public.businesses for insert with check(owner_id=auth.uid() or public.is_admin());drop policy if exists businesses_update on public.businesses;create policy businesses_update on public.businesses for update using(owner_id=auth.uid() or public.is_admin()) with check(owner_id=auth.uid() or public.is_admin());drop policy if exists businesses_delete on public.businesses;create policy businesses_delete on public.businesses for delete using(owner_id=auth.uid() or public.is_admin());
+drop policy if exists products_read on public.products;create policy products_read on public.products for select using((status='active' and exists(select 1 from public.businesses b where b.id=business_id and b.status='approved')) or public.owns_business(business_id) or public.is_admin());drop policy if exists products_insert on public.products;create policy products_insert on public.products for insert with check(public.owns_business(business_id) or public.is_admin());drop policy if exists products_update on public.products;create policy products_update on public.products for update using(public.owns_business(business_id) or public.is_admin()) with check(public.owns_business(business_id) or public.is_admin());drop policy if exists products_delete on public.products;create policy products_delete on public.products for delete using(public.owns_business(business_id) or public.is_admin());
+drop policy if exists deals_read on public.deals;create policy deals_read on public.deals for select using((status='active' and exists(select 1 from public.businesses b where b.id=business_id and b.status='approved')) or public.owns_business(business_id) or public.is_admin());drop policy if exists deals_insert on public.deals;create policy deals_insert on public.deals for insert with check(public.owns_business(business_id) or public.is_admin());drop policy if exists deals_update on public.deals;create policy deals_update on public.deals for update using(public.owns_business(business_id) or public.is_admin()) with check(public.owns_business(business_id) or public.is_admin());drop policy if exists deals_delete on public.deals;create policy deals_delete on public.deals for delete using(public.owns_business(business_id) or public.is_admin());
+drop policy if exists reviews_read on public.reviews;create policy reviews_read on public.reviews for select using(status='published' or user_id=auth.uid() or public.is_admin());drop policy if exists reviews_insert on public.reviews;create policy reviews_insert on public.reviews for insert with check(user_id=auth.uid());drop policy if exists reviews_update on public.reviews;create policy reviews_update on public.reviews for update using(user_id=auth.uid() or public.is_admin()) with check(user_id=auth.uid() or public.is_admin());
+drop policy if exists favorites_all on public.favorites;create policy favorites_all on public.favorites for all using(user_id=auth.uid()) with check(user_id=auth.uid());
+drop policy if exists ads_read on public.advertisements;create policy ads_read on public.advertisements for select using(status='active' or public.owns_business(business_id) or public.is_admin());drop policy if exists ads_insert on public.advertisements;create policy ads_insert on public.advertisements for insert with check(public.owns_business(business_id) or public.is_admin());drop policy if exists ads_update on public.advertisements;create policy ads_update on public.advertisements for update using(public.owns_business(business_id) or public.is_admin()) with check(public.owns_business(business_id) or public.is_admin());
+drop policy if exists subscriptions_read on public.subscriptions;create policy subscriptions_read on public.subscriptions for select using(public.owns_business(business_id) or public.is_admin());
+drop policy if exists payments_read on public.payments;create policy payments_read on public.payments for select using(user_id=auth.uid() or public.is_admin());drop policy if exists payments_insert on public.payments;create policy payments_insert on public.payments for insert with check(user_id=auth.uid() or public.is_admin());drop policy if exists payments_update on public.payments;create policy payments_update on public.payments for update using(public.is_admin()) with check(public.is_admin());
+drop policy if exists notifications_read on public.notifications;create policy notifications_read on public.notifications for select using(user_id=auth.uid() or public.is_admin());drop policy if exists notifications_update on public.notifications;create policy notifications_update on public.notifications for update using(user_id=auth.uid() or public.is_admin()) with check(user_id=auth.uid() or public.is_admin());

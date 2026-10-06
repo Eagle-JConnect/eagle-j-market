@@ -11,23 +11,27 @@ import {
 
 
 // ========================================
-// CHECK SUPABASE
+// SUPABASE CHECK
 // ========================================
 
 if (!supabase) {
+
+  console.error(
+    "EAGLE-J MARKET: Supabase is not configured."
+  );
+
   document.body.innerHTML = `
     <main class="container">
       <section class="card">
         <h2>Connection Error</h2>
-        <p>
-          Supabase is not configured correctly.
-          Please check your config.js file.
-        </p>
+        <p>Supabase is not configured correctly.</p>
       </section>
     </main>
   `;
 
-  throw new Error("Supabase is not configured.");
+  throw new Error(
+    "Supabase is not configured."
+  );
 }
 
 
@@ -35,10 +39,14 @@ if (!supabase) {
 // NAVIGATION
 // ========================================
 
-const navElement = document.querySelector("#nav");
+const navElement =
+  document.querySelector("#nav");
 
 if (navElement) {
-  navElement.innerHTML = nav();
+
+  navElement.innerHTML =
+    nav();
+
 }
 
 
@@ -49,6 +57,7 @@ if (navElement) {
 const logoutButton =
   document.querySelector("#logout");
 
+
 if (logoutButton) {
 
   logoutButton.addEventListener(
@@ -56,21 +65,25 @@ if (logoutButton) {
     async () => {
 
       console.log(
-        "EAGLE-J MARKET: Logout button clicked"
+        "EAGLE-J MARKET: LOGOUT CLICKED"
       );
 
-      logoutButton.disabled = true;
+
+      logoutButton.disabled =
+        true;
 
       logoutButton.textContent =
         "Logging out...";
+
 
       try {
 
         const result =
           await logout();
 
+
         console.log(
-          "Logout result:",
+          "EAGLE-J MARKET: LOGOUT RESULT",
           result
         );
 
@@ -80,45 +93,33 @@ if (logoutButton) {
           result.success === false
         ) {
 
-          console.error(
-            "Logout failed:",
-            result.error
+          throw (
+            result.error ||
+            new Error(
+              "Logout failed."
+            )
           );
 
-          logoutButton.disabled =
-            false;
-
-          logoutButton.textContent =
-            "Logout";
-
-          alert(
-            "Logout failed. Please try again."
-          );
-
-          return;
         }
 
 
         console.log(
-          "EAGLE-J MARKET: Logout successful"
+          "EAGLE-J MARKET: LOGOUT SUCCESS"
         );
 
 
-        // Make sure local session is cleared
-        await supabase.auth.signOut();
-
-
-        // Go to login page
         window.location.replace(
           "./login.html"
         );
 
+
       } catch (error) {
 
         console.error(
-          "Logout error:",
+          "EAGLE-J MARKET: LOGOUT ERROR",
           error
         );
+
 
         logoutButton.disabled =
           false;
@@ -126,9 +127,15 @@ if (logoutButton) {
         logoutButton.textContent =
           "Logout";
 
+
         alert(
-          "An error occurred while logging out."
+          "Logout failed: " +
+          (
+            error?.message ||
+            "Unknown error"
+          )
         );
+
       }
 
     }
@@ -144,17 +151,18 @@ if (logoutButton) {
 const currentUser =
   await requireAuth();
 
+
 if (!currentUser) {
 
   throw new Error(
-    "User is not authenticated."
+    "Authentication required."
   );
 
 }
 
 
 // ========================================
-// ADMIN CHECK
+// ADMIN SECURITY
 // ========================================
 
 const currentProfile =
@@ -171,7 +179,7 @@ if (
   );
 
   throw new Error(
-    "Admin access required."
+    "Admin access denied."
   );
 
 }
@@ -181,16 +189,16 @@ if (
 // ELEMENTS
 // ========================================
 
-const usersEl =
+const usersElement =
   document.querySelector("#users");
 
-const pendingEl =
+const pendingElement =
   document.querySelector("#pending");
 
-const businessesEl =
+const businessesElement =
   document.querySelector("#businesses");
 
-const paymentsEl =
+const paymentsElement =
   document.querySelector("#payments");
 
 const businessTable =
@@ -212,14 +220,11 @@ async function load() {
   try {
 
     const [
-
       usersResult,
       businessesResult,
       paymentsResult
-
     ] = await Promise.all([
 
-      // USERS
       supabase
         .from("profiles")
         .select("*")
@@ -230,7 +235,6 @@ async function load() {
           }
         ),
 
-      // BUSINESSES
       supabase
         .from("businesses")
         .select(
@@ -243,7 +247,6 @@ async function load() {
           }
         ),
 
-      // PAYMENTS
       supabase
         .from("payments")
         .select(
@@ -259,10 +262,6 @@ async function load() {
     ]);
 
 
-    // ====================================
-    // CHECK ERRORS
-    // ====================================
-
     if (usersResult.error) {
 
       console.error(
@@ -272,6 +271,7 @@ async function load() {
 
     }
 
+
     if (businessesResult.error) {
 
       console.error(
@@ -280,6 +280,7 @@ async function load() {
       );
 
     }
+
 
     if (paymentsResult.error) {
 
@@ -291,13 +292,13 @@ async function load() {
     }
 
 
-    const U =
+    const users =
       usersResult.data || [];
 
-    const B =
+    const businesses =
       businessesResult.data || [];
 
-    const P =
+    const payments =
       paymentsResult.data || [];
 
 
@@ -305,46 +306,46 @@ async function load() {
     // STATS
     // ====================================
 
-    if (usersEl) {
+    if (usersElement) {
 
-      usersEl.textContent =
-        U.length;
+      usersElement.textContent =
+        users.length;
 
     }
 
 
-    if (pendingEl) {
+    if (pendingElement) {
 
-      pendingEl.textContent =
-        B.filter(
-          x =>
-            x.status === "pending"
+      pendingElement.textContent =
+        businesses.filter(
+          business =>
+            business.status === "pending"
         ).length;
 
     }
 
 
-    if (businessesEl) {
+    if (businessesElement) {
 
-      businessesEl.textContent =
-        B.length;
+      businessesElement.textContent =
+        businesses.length;
 
     }
 
 
-    if (paymentsEl) {
+    if (paymentsElement) {
 
-      paymentsEl.textContent =
-        P.filter(
-          x =>
-            x.status === "pending"
+      paymentsElement.textContent =
+        payments.filter(
+          payment =>
+            payment.status === "pending"
         ).length;
 
     }
 
 
     // ====================================
-    // BUSINESSES TABLE
+    // BUSINESSES
     // ====================================
 
     if (businessTable) {
@@ -356,17 +357,11 @@ async function load() {
           <thead>
 
             <tr>
-
               <th>Business</th>
-
               <th>Category</th>
-
               <th>Status</th>
-
               <th>Plan</th>
-
               <th>Action</th>
-
             </tr>
 
           </thead>
@@ -374,120 +369,126 @@ async function load() {
           <tbody>
 
             ${
-              B.map(x => `
+              businesses.map(
+                business => `
 
-                <tr>
+                  <tr>
 
-                  <td>
+                    <td>
 
-                    <b>
+                      <b>
+                        ${esc(
+                          business.business_name
+                        )}
+                      </b>
+
+                      <br>
+
+                      <small>
+                        ${esc(
+                          business.area || ""
+                        )}
+                      </small>
+
+                    </td>
+
+
+                    <td>
                       ${esc(
-                        x.business_name
+                        business
+                          .categories
+                          ?.name || ""
                       )}
-                    </b>
+                    </td>
 
-                    <br>
 
-                    <small>
+                    <td>
+
+                      <span
+                        class="badge ${
+                          business.status ===
+                          "approved"
+                            ? "green"
+                            : business.status ===
+                              "pending"
+                            ? "yellow"
+                            : "red"
+                        }"
+                      >
+
+                        ${esc(
+                          business.status || ""
+                        )}
+
+                      </span>
+
+                    </td>
+
+
+                    <td>
                       ${esc(
-                        x.area || ""
+                        business.plan || ""
                       )}
-                    </small>
-
-                  </td>
+                    </td>
 
 
-                  <td>
-                    ${esc(
-                      x.categories?.name || ""
-                    )}
-                  </td>
+                    <td>
+
+                      ${
+                        business.status ===
+                        "pending"
+                          ? `
+
+                            <button
+                              type="button"
+                              class="btn small success"
+                              data-approve="${business.id}"
+                            >
+                              Approve
+                            </button>
+
+                            <button
+                              type="button"
+                              class="btn small danger"
+                              data-reject="${business.id}"
+                            >
+                              Reject
+                            </button>
+
+                          `
+                          : ""
+                      }
 
 
-                  <td>
+                      ${
+                        business.status ===
+                        "approved"
+                          ? `
 
-                    <span
-                      class="badge ${
-                        x.status === "approved"
-                          ? "green"
-                          : x.status === "pending"
-                          ? "yellow"
-                          : "red"
-                      }"
-                    >
+                            <button
+                              type="button"
+                              class="btn small secondary"
+                              data-feature="${business.id}"
+                            >
 
-                      ${esc(
-                        x.status || ""
-                      )}
+                              ${
+                                business.featured
+                                  ? "Unfeature"
+                                  : "Feature"
+                              }
 
-                    </span>
+                            </button>
 
-                  </td>
+                          `
+                          : ""
+                      }
 
+                    </td>
 
-                  <td>
+                  </tr>
 
-                    ${esc(
-                      x.plan || ""
-                    )}
-
-                  </td>
-
-
-                  <td>
-
-                    ${
-                      x.status === "pending"
-                        ? `
-
-                          <button
-                            type="button"
-                            class="btn small success"
-                            data-approve="${x.id}"
-                          >
-                            Approve
-                          </button>
-
-                          <button
-                            type="button"
-                            class="btn small danger"
-                            data-reject="${x.id}"
-                          >
-                            Reject
-                          </button>
-
-                        `
-                        : ""
-                    }
-
-
-                    ${
-                      x.status === "approved"
-                        ? `
-
-                          <button
-                            type="button"
-                            class="btn small secondary"
-                            data-feature="${x.id}"
-                          >
-
-                            ${
-                              x.featured
-                                ? "Unfeature"
-                                : "Feature"
-                            }
-
-                          </button>
-
-                        `
-                        : ""
-                    }
-
-                  </td>
-
-                </tr>
-
-              `).join("")
+                `
+              ).join("")
             }
 
           </tbody>
@@ -500,7 +501,7 @@ async function load() {
 
 
     // ====================================
-    // USERS TABLE
+    // USERS
     // ====================================
 
     if (userTable) {
@@ -512,15 +513,10 @@ async function load() {
           <thead>
 
             <tr>
-
               <th>Name</th>
-
               <th>Phone</th>
-
               <th>Type</th>
-
               <th>Status</th>
-
             </tr>
 
           </thead>
@@ -528,52 +524,45 @@ async function load() {
           <tbody>
 
             ${
-              U.map(x => `
+              users.map(
+                user => `
 
-                <tr>
+                  <tr>
 
-                  <td>
+                    <td>
 
-                    ${esc(
-                      x.first_name || ""
-                    )}
+                      ${esc(
+                        user.first_name || ""
+                      )}
 
-                    ${esc(
-                      x.last_name || ""
-                    )}
+                      ${esc(
+                        user.last_name || ""
+                      )}
 
-                  </td>
+                    </td>
 
+                    <td>
+                      ${esc(
+                        user.phone || ""
+                      )}
+                    </td>
 
-                  <td>
+                    <td>
+                      ${esc(
+                        user.account_type || ""
+                      )}
+                    </td>
 
-                    ${esc(
-                      x.phone || ""
-                    )}
+                    <td>
+                      ${esc(
+                        user.status || ""
+                      )}
+                    </td>
 
-                  </td>
+                  </tr>
 
-
-                  <td>
-
-                    ${esc(
-                      x.account_type || ""
-                    )}
-
-                  </td>
-
-
-                  <td>
-
-                    ${esc(
-                      x.status || ""
-                    )}
-
-                  </td>
-
-                </tr>
-
-              `).join("")
+                `
+              ).join("")
             }
 
           </tbody>
@@ -586,7 +575,7 @@ async function load() {
 
 
     // ====================================
-    // PAYMENTS TABLE
+    // PAYMENTS
     // ====================================
 
     if (paymentTable) {
@@ -598,17 +587,11 @@ async function load() {
           <thead>
 
             <tr>
-
               <th>Business</th>
-
               <th>Amount</th>
-
               <th>Type</th>
-
               <th>Status</th>
-
               <th>Action</th>
-
             </tr>
 
           </thead>
@@ -616,70 +599,69 @@ async function load() {
           <tbody>
 
             ${
-              P.map(x => `
+              payments.map(
+                payment => `
 
-                <tr>
+                  <tr>
 
-                  <td>
+                    <td>
 
-                    ${esc(
-                      x.businesses
-                        ?.business_name || ""
-                    )}
+                      ${esc(
+                        payment
+                          .businesses
+                          ?.business_name ||
+                        ""
+                      )}
 
-                  </td>
+                    </td>
 
+                    <td>
 
-                  <td>
+                      $${Number(
+                        payment.amount || 0
+                      ).toFixed(2)}
 
-                    $${Number(
-                      x.amount || 0
-                    ).toFixed(2)}
+                    </td>
 
-                  </td>
+                    <td>
+                      ${esc(
+                        payment.payment_type ||
+                        ""
+                      )}
+                    </td>
 
+                    <td>
+                      ${esc(
+                        payment.status ||
+                        ""
+                      )}
+                    </td>
 
-                  <td>
+                    <td>
 
-                    ${esc(
-                      x.payment_type || ""
-                    )}
+                      ${
+                        payment.status ===
+                        "pending"
+                          ? `
 
-                  </td>
+                            <button
+                              type="button"
+                              class="btn small success"
+                              data-pay="${payment.id}"
+                            >
+                              Mark Paid
+                            </button>
 
+                          `
+                          : ""
+                      }
 
-                  <td>
+                    </td>
 
-                    ${esc(
-                      x.status || ""
-                    )}
+                  </tr>
 
-                  </td>
-
-
-                  <td>
-
-                    ${
-                      x.status === "pending"
-                        ? `
-
-                          <button
-                            type="button"
-                            class="btn small success"
-                            data-pay="${x.id}"
-                          >
-                            Mark Paid
-                          </button>
-
-                        `
-                        : ""
-                    }
-
-                  </td>
-
-                </tr>
-
-              `).join("")
+                `
+              ).join("")
             }
 
           </tbody>
@@ -704,7 +686,9 @@ async function load() {
         button.onclick =
           async () => {
 
-            button.disabled = true;
+            button.disabled =
+              true;
+
 
             const result =
               await supabase
@@ -757,7 +741,9 @@ async function load() {
         button.onclick =
           async () => {
 
-            button.disabled = true;
+            button.disabled =
+              true;
+
 
             const result =
               await supabase
@@ -796,7 +782,7 @@ async function load() {
 
 
     // ====================================
-    // FEATURE BUSINESS
+    // FEATURE
     // ====================================
 
     document
@@ -809,18 +795,20 @@ async function load() {
           async () => {
 
             const business =
-              B.find(
-                x =>
-                  x.id ===
+              businesses.find(
+                item =>
+                  item.id ===
                   button.dataset.feature
               );
 
 
-            if (!business)
+            if (!business) {
               return;
+            }
 
 
-            button.disabled = true;
+            button.disabled =
+              true;
 
 
             const result =
@@ -877,18 +865,20 @@ async function load() {
           async () => {
 
             const payment =
-              P.find(
-                x =>
-                  x.id ===
+              payments.find(
+                item =>
+                  item.id ===
                   button.dataset.pay
               );
 
 
-            if (!payment)
+            if (!payment) {
               return;
+            }
 
 
-            button.disabled = true;
+            button.disabled =
+              true;
 
 
             const result =
@@ -930,7 +920,7 @@ async function load() {
   } catch (error) {
 
     console.error(
-      "Dashboard load error:",
+      "Dashboard loading error:",
       error
     );
 
@@ -944,7 +934,7 @@ async function load() {
 
 
 // ========================================
-// ADMIN TABS
+// TABS
 // ========================================
 
 document
@@ -953,58 +943,60 @@ document
   )
   .forEach(button => {
 
-    button.onclick = () => {
+    button.addEventListener(
+      "click",
+      () => {
 
-      const tabs = [
-        "businessTab",
-        "usersTab",
-        "paymentsTab"
-      ];
+        const tabs = [
+          "businessTab",
+          "usersTab",
+          "paymentsTab"
+        ];
 
 
-      tabs.forEach(id => {
+        tabs.forEach(id => {
 
-        const section =
-          document.querySelector(
-            "#" + id
+          const section =
+            document.getElementById(id);
+
+          if (section) {
+
+            section.classList.add(
+              "hidden"
+            );
+
+          }
+
+        });
+
+
+        const selected =
+          document.getElementById(
+            button.dataset.tab
           );
 
-        if (section) {
 
-          section.classList.add(
+        if (selected) {
+
+          selected.classList.remove(
             "hidden"
           );
 
         }
 
-      });
-
-
-      const selected =
-        document.querySelector(
-          "#" + button.dataset.tab
-        );
-
-
-      if (selected) {
-
-        selected.classList.remove(
-          "hidden"
-        );
-
       }
-
-    };
+    );
 
   });
 
 
 // ========================================
-// START DASHBOARD
+// START
 // ========================================
 
 await load();
 
+
 console.log(
-  "EAGLE-J MARKET Admin Dashboard loaded successfully."
+  "EAGLE-J MARKET: Admin Dashboard loaded."
 );

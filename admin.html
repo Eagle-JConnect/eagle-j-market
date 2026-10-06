@@ -1,74 +1,172 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EAGLE-J MARKET — Admin Dashboard</title>
 
-  <link rel="stylesheet" href="./style.css">
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    EAGLE-J MARKET - Admin Dashboard
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="./style.css"
+  >
+
 </head>
+
 
 <body>
 
+
+  <!-- NAV -->
+
   <div id="nav"></div>
+
 
   <main class="container">
 
-    <div class="admin-header">
-      <h1>Admin Dashboard</h1>
-      <p>Manage EAGLE-J MARKET</p>
 
-      <button id="logout" class="btn danger">
+    <!-- ADMIN HEADER -->
+
+    <section class="admin-header">
+
+      <div>
+
+        <h1>
+          Admin Dashboard
+        </h1>
+
+        <p>
+          Manage EAGLE-J MARKET
+        </p>
+
+      </div>
+
+
+      <button
+        type="button"
+        id="logout"
+        class="btn danger"
+      >
         Logout
       </button>
-    </div>
-
-    <!-- STATS -->
-    <section class="stats">
-
-      <div class="card">
-        <h3>Users</h3>
-        <strong id="users">0</strong>
-      </div>
-
-      <div class="card">
-        <h3>Pending Businesses</h3>
-        <strong id="pending">0</strong>
-      </div>
-
-      <div class="card">
-        <h3>Total Businesses</h3>
-        <strong id="businesses">0</strong>
-      </div>
-
-      <div class="card">
-        <h3>Pending Payments</h3>
-        <strong id="payments">0</strong>
-      </div>
 
     </section>
 
+
+
+    <!-- STATS -->
+
+    <section class="stats">
+
+
+      <div class="card">
+
+        <h3>
+          Users
+        </h3>
+
+        <strong id="users">
+          0
+        </strong>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>
+          Pending Businesses
+        </h3>
+
+        <strong id="pending">
+          0
+        </strong>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>
+          Total Businesses
+        </h3>
+
+        <strong id="businesses">
+          0
+        </strong>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>
+          Pending Payments
+        </h3>
+
+        <strong id="payments">
+          0
+        </strong>
+
+      </div>
+
+
+    </section>
+
+
+
     <!-- TABS -->
+
     <div class="admin-nav">
 
-      <button class="btn" data-tab="businessTab">
+
+      <button
+        type="button"
+        class="btn"
+        data-tab="businessTab"
+      >
         Businesses
       </button>
 
-      <button class="btn" data-tab="usersTab">
+
+      <button
+        type="button"
+        class="btn"
+        data-tab="usersTab"
+      >
         Users
       </button>
 
-      <button class="btn" data-tab="paymentsTab">
+
+      <button
+        type="button"
+        class="btn"
+        data-tab="paymentsTab"
+      >
         Payments
       </button>
 
+
     </div>
 
+
+
     <!-- BUSINESSES -->
+
     <section id="businessTab">
 
-      <h2>Businesses</h2>
+      <h2>
+        Businesses
+      </h2>
 
       <div id="businessTable">
         Loading...
@@ -76,10 +174,18 @@
 
     </section>
 
-    <!-- USERS -->
-    <section id="usersTab" class="hidden">
 
-      <h2>Users</h2>
+
+    <!-- USERS -->
+
+    <section
+      id="usersTab"
+      class="hidden"
+    >
+
+      <h2>
+        Users
+      </h2>
 
       <div id="userTable">
         Loading...
@@ -87,10 +193,18 @@
 
     </section>
 
-    <!-- PAYMENTS -->
-    <section id="paymentsTab" class="hidden">
 
-      <h2>Payments</h2>
+
+    <!-- PAYMENTS -->
+
+    <section
+      id="paymentsTab"
+      class="hidden"
+    >
+
+      <h2>
+        Payments
+      </h2>
 
       <div id="paymentTable">
         Loading...
@@ -98,617 +212,976 @@
 
     </section>
 
+
   </main>
+
+
+
+  <!-- JAVASCRIPT -->
 
   <script type="module">
 
-    import { supabase } from './supabase.js';
+    import {
+      supabase
+    } from "./supabase.js";
+
 
     import {
       nav,
       requireAuth,
       profile,
+      logout,
       esc,
       toast
-    } from './utils.js';
+    } from "./utils.js";
+
 
 
     /* =========================
        NAVIGATION
     ========================= */
 
-    document.querySelector('#nav').innerHTML = nav();
+    document
+      .querySelector("#nav")
+      .innerHTML = nav();
+
 
 
     /* =========================
-       CHECK AUTH
+       AUTHENTICATION
     ========================= */
 
-    const u = await requireAuth();
+    const currentUser =
+      await requireAuth();
 
-    if (!u) {
-      window.location.href = 'login.html';
+
+    if (!currentUser) {
+
+      throw new Error(
+        "Authentication required."
+      );
+
     }
 
 
+
     /* =========================
-       CHECK ADMIN
+       ADMIN SECURITY
     ========================= */
 
-    if (u) {
+    const currentProfile =
+      await profile();
 
-      const p = await profile();
 
-      if (!p || p.account_type !== 'admin') {
+    if (
+      !currentProfile ||
+      currentProfile.account_type !== "admin"
+    ) {
 
-        window.location.href = 'dashboard.html';
+      window.location.replace(
+        "dashboard.html"
+      );
 
-      } else {
+      throw new Error(
+        "Admin access denied."
+      );
+
+    }
+
+
+
+    /* =========================
+       ELEMENTS
+    ========================= */
+
+    const usersElement =
+      document.querySelector(
+        "#users"
+      );
+
+    const pendingElement =
+      document.querySelector(
+        "#pending"
+      );
+
+    const businessesElement =
+      document.querySelector(
+        "#businesses"
+      );
+
+    const paymentsElement =
+      document.querySelector(
+        "#payments"
+      );
+
+
+    const businessTable =
+      document.querySelector(
+        "#businessTable"
+      );
+
+    const userTable =
+      document.querySelector(
+        "#userTable"
+      );
+
+    const paymentTable =
+      document.querySelector(
+        "#paymentTable"
+      );
+
+
+
+    /* =========================
+       LOAD DATA
+    ========================= */
+
+    async function load() {
+
+      try {
+
+
+        const [
+          usersResult,
+          businessesResult,
+          paymentsResult
+        ] = await Promise.all([
+
+
+          supabase
+            .from("profiles")
+            .select("*")
+            .order(
+              "created_at",
+              {
+                ascending: false
+              }
+            ),
+
+
+          supabase
+            .from("businesses")
+            .select(
+              "*,categories(name)"
+            )
+            .order(
+              "created_at",
+              {
+                ascending: false
+              }
+            ),
+
+
+          supabase
+            .from("payments")
+            .select(
+              "*,businesses(business_name)"
+            )
+            .order(
+              "created_at",
+              {
+                ascending: false
+              }
+            )
+
+        ]);
+
+
+        const users =
+          usersResult.data || [];
+
+        const businesses =
+          businessesResult.data || [];
+
+        const payments =
+          paymentsResult.data || [];
+
 
 
         /* =========================
-           ELEMENTS
+           STATS
         ========================= */
 
-        const usersEl = document.querySelector('#users');
-        const pendingEl = document.querySelector('#pending');
-        const businessesEl = document.querySelector('#businesses');
-        const paymentsEl = document.querySelector('#payments');
+        usersElement.textContent =
+          users.length;
 
-        const businessTable =
-          document.querySelector('#businessTable');
 
-        const userTable =
-          document.querySelector('#userTable');
+        pendingElement.textContent =
+          businesses.filter(
+            business =>
+              business.status === "pending"
+          ).length;
 
-        const paymentTable =
-          document.querySelector('#paymentTable');
+
+        businessesElement.textContent =
+          businesses.length;
+
+
+        paymentsElement.textContent =
+          payments.filter(
+            payment =>
+              payment.status === "pending"
+          ).length;
+
 
 
         /* =========================
-           LOAD DATA
+           BUSINESS TABLE
         ========================= */
 
-        async function load() {
+        businessTable.innerHTML = `
 
-          const [
+          <table class="table">
 
-            us,
-            bs,
-            ps
+            <thead>
 
-          ] = await Promise.all([
+              <tr>
 
-            supabase
-              .from('profiles')
-              .select('*')
-              .order('created_at', {
-                ascending: false
-              }),
+                <th>
+                  Business
+                </th>
 
-            supabase
-              .from('businesses')
-              .select('*,categories(name)')
-              .order('created_at', {
-                ascending: false
-              }),
+                <th>
+                  Category
+                </th>
 
-            supabase
-              .from('payments')
-              .select('*,businesses(business_name)')
-              .order('created_at', {
-                ascending: false
-              })
+                <th>
+                  Status
+                </th>
 
-          ]);
+                <th>
+                  Plan
+                </th>
 
+                <th>
+                  Action
+                </th>
 
-          const U = us.data || [];
-          const B = bs.data || [];
-          const P = ps.data || [];
+              </tr>
+
+            </thead>
 
 
-          /* =========================
-             STATS
-          ========================= */
+            <tbody>
 
-          usersEl.textContent = U.length;
-
-          pendingEl.textContent =
-            B.filter(x => x.status === 'pending').length;
-
-          businessesEl.textContent =
-            B.length;
-
-          paymentsEl.textContent =
-            P.filter(x => x.status === 'pending').length;
-
-
-          /* =========================
-             BUSINESS TABLE
-          ========================= */
-
-          businessTable.innerHTML = `
-
-            <table class="table">
-
-              <thead>
+              ${businesses.map(
+                business => `
 
                 <tr>
-                  <th>Business</th>
-                  <th>Category</th>
-                  <th>Status</th>
-                  <th>Plan</th>
-                  <th>Action</th>
-                </tr>
 
-              </thead>
+                  <td>
 
-              <tbody>
-
-                ${B.map(x => `
-
-                  <tr>
-
-                    <td>
-                      <b>${esc(x.business_name)}</b>
-                      <br>
-                      <small>${esc(x.area || '')}</small>
-                    </td>
-
-                    <td>
-                      ${esc(x.categories?.name || '')}
-                    </td>
-
-                    <td>
-
-                      <span class="badge ${
-                        x.status === 'approved'
-                          ? 'green'
-                          : x.status === 'pending'
-                          ? 'yellow'
-                          : 'red'
-                      }">
-
-                        ${esc(x.status)}
-
-                      </span>
-
-                    </td>
-
-                    <td>
-                      ${esc(x.plan || '')}
-                    </td>
-
-                    <td>
-
-                      ${
-                        x.status === 'pending'
-
-                        ? `
-
-                          <button
-                            class="btn small success"
-                            data-approve="${x.id}">
-                            Approve
-                          </button>
-
-                          <button
-                            class="btn small danger"
-                            data-reject="${x.id}">
-                            Reject
-                          </button>
-
-                        `
-
-                        : ''
-                      }
-
-
-                      ${
-                        x.status === 'approved'
-
-                        ? `
-
-                          <button
-                            class="btn small secondary"
-                            data-feature="${x.id}">
-
-                            ${
-                              x.featured
-                                ? 'Unfeature'
-                                : 'Feature'
-                            }
-
-                          </button>
-
-                        `
-
-                        : ''
-                      }
-
-                    </td>
-
-                  </tr>
-
-                `).join('')}
-
-              </tbody>
-
-            </table>
-
-          `;
-
-
-          /* =========================
-             USER TABLE
-          ========================= */
-
-          userTable.innerHTML = `
-
-            <table class="table">
-
-              <thead>
-
-                <tr>
-                  <th>Name</th>
-                  <th>Phone</th>
-                  <th>Type</th>
-                  <th>Status</th>
-                </tr>
-
-              </thead>
-
-              <tbody>
-
-                ${U.map(x => `
-
-                  <tr>
-
-                    <td>
-                      ${esc(x.first_name || '')}
-                      ${esc(x.last_name || '')}
-                    </td>
-
-                    <td>
-                      ${esc(x.phone || '')}
-                    </td>
-
-                    <td>
-                      ${esc(x.account_type || '')}
-                    </td>
-
-                    <td>
-                      ${esc(x.status || '')}
-                    </td>
-
-                  </tr>
-
-                `).join('')}
-
-              </tbody>
-
-            </table>
-
-          `;
-
-
-          /* =========================
-             PAYMENT TABLE
-          ========================= */
-
-          paymentTable.innerHTML = `
-
-            <table class="table">
-
-              <thead>
-
-                <tr>
-                  <th>Business</th>
-                  <th>Amount</th>
-                  <th>Type</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-
-              </thead>
-
-              <tbody>
-
-                ${P.map(x => `
-
-                  <tr>
-
-                    <td>
+                    <b>
                       ${esc(
-                        x.businesses?.business_name || ''
+                        business.business_name
                       )}
-                    </td>
+                    </b>
 
-                    <td>
-                      $${Number(x.amount || 0).toFixed(2)}
-                    </td>
+                    <br>
 
-                    <td>
-                      ${esc(x.payment_type || '')}
-                    </td>
+                    <small>
+                      ${esc(
+                        business.area || ""
+                      )}
+                    </small>
 
-                    <td>
-                      ${esc(x.status || '')}
-                    </td>
+                  </td>
 
-                    <td>
 
-                      ${
-                        x.status === 'pending'
+                  <td>
+                    ${esc(
+                      business
+                        .categories
+                        ?.name || ""
+                    )}
+                  </td>
+
+
+                  <td>
+
+                    <span
+                      class="badge ${
+                        business.status ===
+                        "approved"
+                          ? "green"
+                          : business.status ===
+                            "pending"
+                          ? "yellow"
+                          : "red"
+                      }"
+                    >
+
+                      ${esc(
+                        business.status
+                      )}
+
+                    </span>
+
+                  </td>
+
+
+                  <td>
+                    ${esc(
+                      business.plan || ""
+                    )}
+                  </td>
+
+
+                  <td>
+
+                    ${
+                      business.status ===
+                      "pending"
 
                         ? `
 
-                          <button
-                            class="btn small success"
-                            data-pay="${x.id}">
+                        <button
+                          type="button"
+                          class="btn small success"
+                          data-approve="${business.id}"
+                        >
+                          Approve
+                        </button>
 
-                            Mark Paid
+                        <button
+                          type="button"
+                          class="btn small danger"
+                          data-reject="${business.id}"
+                        >
+                          Reject
+                        </button>
 
-                          </button>
+                      `
 
-                        `
-
-                        : ''
-                      }
-
-                    </td>
-
-                  </tr>
-
-                `).join('')}
-
-              </tbody>
-
-            </table>
-
-          `;
+                        : ""
+                    }
 
 
-          /* =========================
-             APPROVE BUSINESS
-          ========================= */
+                    ${
+                      business.status ===
+                      "approved"
 
-          document
-            .querySelectorAll('[data-approve]')
-            .forEach(button => {
+                        ? `
 
-              button.onclick = async () => {
+                        <button
+                          type="button"
+                          class="btn small secondary"
+                          data-feature="${business.id}"
+                        >
 
-                const r = await supabase
-                  .from('businesses')
-                  .update({
-                    status: 'approved',
-                    verified: true
-                  })
-                  .eq('id', button.dataset.approve);
+                          ${
+                            business.featured
+                              ? "Unfeature"
+                              : "Feature"
+                          }
 
+                        </button>
 
-                toast(
-                  r.error?.message ||
-                  'Business approved',
-                  !r.error
-                );
+                      `
 
+                        : ""
+                    }
 
-                if (!r.error) {
-                  load();
-                }
+                  </td>
 
-              };
+                </tr>
 
-            });
+              `
+              ).join("")}
 
+            </tbody>
 
-          /* =========================
-             REJECT BUSINESS
-          ========================= */
+          </table>
 
-          document
-            .querySelectorAll('[data-reject]')
-            .forEach(button => {
+        `;
 
-              button.onclick = async () => {
-
-                const r = await supabase
-                  .from('businesses')
-                  .update({
-                    status: 'rejected'
-                  })
-                  .eq('id', button.dataset.reject);
-
-
-                toast(
-                  r.error?.message ||
-                  'Business rejected',
-                  !r.error
-                );
-
-
-                if (!r.error) {
-                  load();
-                }
-
-              };
-
-            });
-
-
-          /* =========================
-             FEATURE BUSINESS
-          ========================= */
-
-          document
-            .querySelectorAll('[data-feature]')
-            .forEach(button => {
-
-              button.onclick = async () => {
-
-                const business =
-                  B.find(
-                    x =>
-                      x.id === button.dataset.feature
-                  );
-
-
-                if (!business) return;
-
-
-                const r = await supabase
-                  .from('businesses')
-                  .update({
-                    featured: !business.featured
-                  })
-                  .eq('id', business.id);
-
-
-                toast(
-                  r.error?.message ||
-                  (
-                    business.featured
-                      ? 'Business unfeatured'
-                      : 'Business featured'
-                  ),
-                  !r.error
-                );
-
-
-                if (!r.error) {
-                  load();
-                }
-
-              };
-
-            });
-
-
-          /* =========================
-             MARK PAYMENT AS PAID
-          ========================= */
-
-          document
-            .querySelectorAll('[data-pay]')
-            .forEach(button => {
-
-              button.onclick = async () => {
-
-                const payment =
-                  P.find(
-                    x =>
-                      x.id === button.dataset.pay
-                  );
-
-
-                if (!payment) return;
-
-
-                const r = await supabase
-                  .from('payments')
-                  .update({
-                    status: 'paid'
-                  })
-                  .eq('id', payment.id);
-
-
-                toast(
-                  r.error?.message ||
-                  'Payment marked paid',
-                  !r.error
-                );
-
-
-                if (!r.error) {
-                  load();
-                }
-
-              };
-
-            });
-
-        }
 
 
         /* =========================
-           TABS
+           USERS TABLE
+        ========================= */
+
+        userTable.innerHTML = `
+
+          <table class="table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Name
+                </th>
+
+                <th>
+                  Phone
+                </th>
+
+                <th>
+                  Type
+                </th>
+
+                <th>
+                  Status
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              ${users.map(
+                user => `
+
+                <tr>
+
+                  <td>
+
+                    ${esc(
+                      user.first_name || ""
+                    )}
+
+                    ${esc(
+                      user.last_name || ""
+                    )}
+
+                  </td>
+
+
+                  <td>
+
+                    ${esc(
+                      user.phone || ""
+                    )}
+
+                  </td>
+
+
+                  <td>
+
+                    ${esc(
+                      user.account_type ||
+                      ""
+                    )}
+
+                  </td>
+
+
+                  <td>
+
+                    ${esc(
+                      user.status || ""
+                    )}
+
+                  </td>
+
+                </tr>
+
+              `
+              ).join("")}
+
+            </tbody>
+
+          </table>
+
+        `;
+
+
+
+        /* =========================
+           PAYMENTS TABLE
+        ========================= */
+
+        paymentTable.innerHTML = `
+
+          <table class="table">
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Business
+                </th>
+
+                <th>
+                  Amount
+                </th>
+
+                <th>
+                  Type
+                </th>
+
+                <th>
+                  Status
+                </th>
+
+                <th>
+                  Action
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              ${payments.map(
+                payment => `
+
+                <tr>
+
+                  <td>
+
+                    ${esc(
+                      payment
+                        .businesses
+                        ?.business_name ||
+                      ""
+                    )}
+
+                  </td>
+
+
+                  <td>
+
+                    $${Number(
+                      payment.amount || 0
+                    ).toFixed(2)}
+
+                  </td>
+
+
+                  <td>
+
+                    ${esc(
+                      payment.payment_type ||
+                      ""
+                    )}
+
+                  </td>
+
+
+                  <td>
+
+                    ${esc(
+                      payment.status ||
+                      ""
+                    )}
+
+                  </td>
+
+
+                  <td>
+
+                    ${
+                      payment.status ===
+                      "pending"
+
+                        ? `
+
+                        <button
+                          type="button"
+                          class="btn small success"
+                          data-pay="${payment.id}"
+                        >
+                          Mark Paid
+                        </button>
+
+                      `
+
+                        : ""
+                    }
+
+                  </td>
+
+                </tr>
+
+              `
+              ).join("")}
+
+            </tbody>
+
+          </table>
+
+        `;
+
+
+
+        /* =========================
+           APPROVE
         ========================= */
 
         document
           .querySelectorAll(
-            '.admin-nav button[data-tab]'
+            "[data-approve]"
           )
           .forEach(button => {
 
-            button.onclick = () => {
+            button.onclick =
+              async () => {
 
-              [
-                'businessTab',
-                'usersTab',
-                'paymentsTab'
-              ].forEach(id => {
+                const result =
+                  await supabase
+                    .from(
+                      "businesses"
+                    )
+                    .update({
+                      status:
+                        "approved",
+                      verified:
+                        true
+                    })
+                    .eq(
+                      "id",
+                      button.dataset
+                        .approve
+                    );
 
-                document
-                  .querySelector('#' + id)
-                  .classList.add('hidden');
 
-              });
+                toast(
+                  result.error
+                    ?.message ||
+                    "Business approved",
+                  !result.error
+                );
 
 
-              document
-                .querySelector(
-                  '#' + button.dataset.tab
-                )
-                .classList.remove('hidden');
+                if (!result.error) {
 
-            };
+                  await load();
+
+                }
+
+              };
 
           });
 
 
+
         /* =========================
-           LOGOUT
+           REJECT
         ========================= */
 
         document
-          .querySelector('#logout')
-          .addEventListener('click', async () => {
+          .querySelectorAll(
+            "[data-reject]"
+          )
+          .forEach(button => {
 
-            const { error } =
-              await supabase.auth.signOut();
+            button.onclick =
+              async () => {
+
+                const result =
+                  await supabase
+                    .from(
+                      "businesses"
+                    )
+                    .update({
+                      status:
+                        "rejected"
+                    })
+                    .eq(
+                      "id",
+                      button.dataset
+                        .reject
+                    );
 
 
-            if (error) {
-
-              toast(
-                error.message,
-                false
-              );
-
-              return;
-            }
+                toast(
+                  result.error
+                    ?.message ||
+                    "Business rejected",
+                  !result.error
+                );
 
 
-            window.location.href =
-              'login.html';
+                if (!result.error) {
+
+                  await load();
+
+                }
+
+              };
 
           });
 
 
+
         /* =========================
-           START DASHBOARD
+           FEATURE
         ========================= */
 
-        load();
+        document
+          .querySelectorAll(
+            "[data-feature]"
+          )
+          .forEach(button => {
+
+            button.onclick =
+              async () => {
+
+                const business =
+                  businesses.find(
+                    item =>
+                      item.id ===
+                      button.dataset
+                        .feature
+                  );
+
+
+                if (!business) {
+                  return;
+                }
+
+
+                const result =
+                  await supabase
+                    .from(
+                      "businesses"
+                    )
+                    .update({
+                      featured:
+                        !business.featured
+                    })
+                    .eq(
+                      "id",
+                      business.id
+                    );
+
+
+                toast(
+                  result.error
+                    ?.message ||
+                    (
+                      business.featured
+                        ? "Business unfeatured"
+                        : "Business featured"
+                    ),
+                  !result.error
+                );
+
+
+                if (!result.error) {
+
+                  await load();
+
+                }
+
+              };
+
+          });
+
+
+
+        /* =========================
+           MARK PAYMENT PAID
+        ========================= */
+
+        document
+          .querySelectorAll(
+            "[data-pay]"
+          )
+          .forEach(button => {
+
+            button.onclick =
+              async () => {
+
+                const payment =
+                  payments.find(
+                    item =>
+                      item.id ===
+                      button.dataset
+                        .pay
+                  );
+
+
+                if (!payment) {
+                  return;
+                }
+
+
+                const result =
+                  await supabase
+                    .from(
+                      "payments"
+                    )
+                    .update({
+                      status:
+                        "paid"
+                    })
+                    .eq(
+                      "id",
+                      payment.id
+                    );
+
+
+                toast(
+                  result.error
+                    ?.message ||
+                    "Payment marked paid",
+                  !result.error
+                );
+
+
+                if (!result.error) {
+
+                  await load();
+
+                }
+
+              };
+
+          });
+
+
+      } catch (error) {
+
+        console.error(
+          "Dashboard loading error:",
+          error
+        );
 
       }
 
     }
 
+
+
+    /* =========================
+       TABS
+    ========================= */
+
+    document
+      .querySelectorAll(
+        ".admin-nav button[data-tab]"
+      )
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+
+            [
+              "businessTab",
+              "usersTab",
+              "paymentsTab"
+            ].forEach(id => {
+
+              document
+                .getElementById(id)
+                .classList
+                .add("hidden");
+
+            });
+
+
+            document
+              .getElementById(
+                button.dataset.tab
+              )
+              .classList
+              .remove("hidden");
+
+          }
+        );
+
+      });
+
+
+
+    /* =========================
+       LOGOUT
+    ========================= */
+
+    const logoutButton =
+      document.getElementById(
+        "logout"
+      );
+
+
+    logoutButton.addEventListener(
+      "click",
+      async () => {
+
+        console.log(
+          "LOGOUT BUTTON CLICKED"
+        );
+
+
+        logoutButton.disabled =
+          true;
+
+        logoutButton.textContent =
+          "Logging out...";
+
+
+        const result =
+          await logout();
+
+
+        if (!result.success) {
+
+          console.error(
+            "Logout failed:",
+            result.error
+          );
+
+
+          alert(
+            "Logout failed: " +
+            (
+              result.error
+                ?.message ||
+              "Unknown error"
+            )
+          );
+
+
+          logoutButton.disabled =
+            false;
+
+          logoutButton.textContent =
+            "Logout";
+
+          return;
+
+        }
+
+
+        console.log(
+          "LOGOUT COMPLETE"
+        );
+
+
+        /*
+          Force browser to leave
+          the Admin page.
+        */
+
+        window.location.replace(
+          "./login.html"
+        );
+
+      }
+    );
+
+
+
+    /* =========================
+       START
+    ========================= */
+
+    await load();
+
+
   </script>
 
+
 </body>
+
 </html>

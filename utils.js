@@ -339,13 +339,49 @@ export function bindImagePicker(input, preview, {folder="general", onUploaded=()
    GLOBAL ONLINE PRESENCE
 ========================= */
 let presenceChannel=null;
+let presenceStarted=false;
+
 export async function startPresence(){
-  const status=document.querySelector("#presenceStatus"); if(!status||!supabase)return;
-  const sessionId=crypto.randomUUID();
-  presenceChannel=supabase.channel("eagle-j-market-online",{config:{presence:{key:sessionId}}});
-  const update=()=>{const count=Object.keys(presenceChannel.presenceState()).length;status.textContent=count>0?`${t("Someone is connected")} • ${count}`:t("Online");status.classList.add("presence-online");};
-  presenceChannel.on("presence",{event:"sync"},update).on("presence",{event:"join"},update).on("presence",{event:"leave"},update);
-  await presenceChannel.subscribe(async code=>{if(code==="SUBSCRIBED"){await presenceChannel.track({online_at:new Date().toISOString()});update();}});
+  const status=document.querySelector("#presenceStatus");
+  if(!status || !supabase || presenceStarted) return;
+  presenceStarted=true;
+
+  try {
+    const sessionId=crypto.randomUUID();
+    presenceChannel=supabase.channel("eagle-j-market-online",{
+      config:{presence:{key:sessionId}}
+    });
+
+    const update=()=>{
+      if(!presenceChannel) return;
+      const count=Object.keys(presenceChannel.presenceState()).length;
+      status.textContent=count>0
+        ? `${t("Someone is connected")} • ${count}`
+        : t("Online");
+      status.classList.add("presence-online");
+    };
+
+    presenceChannel
+      .on("presence",{event:"sync"},update)
+      .on("presence",{event:"join"},update)
+      .on("presence",{event:"leave"},update);
+
+    const result=await presenceChannel.subscribe(async code=>{
+      if(code==="SUBSCRIBED"){
+        await presenceChannel.track({online_at:new Date().toISOString()});
+        update();
+      }
+    });
+
+    if(result === "CHANNEL_ERROR" || result === "TIMED_OUT") {
+      presenceChannel=null;
+      presenceStarted=false;
+    }
+  } catch(error) {
+    console.warn("Presence unavailable:",error);
+    presenceChannel=null;
+    presenceStarted=false;
+  }
 }
 
 /* =========================
@@ -353,7 +389,7 @@ export async function startPresence(){
 ========================= */
 
 export function nav(active = "") {
-  queueMicrotask(()=>{initLanguage();startPresence();});
+  queueMicrotask(()=>initLanguage());
   return `
     <header class="header">
       <a class="brand" href="index.html">🦅 <span>EAGLE-J MARKET</span></a>
@@ -372,5 +408,16 @@ export function nav(active = "") {
 }
 
 
-if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",()=>{initLanguage();startPresence();}); else {initLanguage();startPresence();}
-document.addEventListener("change",e=>{if(e.target?.id==="languageSelect") setLanguage(e.target.value);});
+if(document.readyState==="loading") {
+  document.addEventListener("DOMContentLoaded",()=>{
+    initLanguage();
+    startPresence();
+  },{once:true});
+} else {
+  initLanguage();
+  startPresence();
+}
+
+document.addEventListener("change",e=>{
+  if(e.target?.id==="languageSelect") setLanguage(e.target.value);
+});

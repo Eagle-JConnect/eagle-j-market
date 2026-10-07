@@ -6,7 +6,8 @@ import {
   profile,
   logout,
   esc,
-  toast
+  toast,
+  bootGlobalUI
 } from "./utils.js";
 
 
@@ -39,15 +40,11 @@ if (!supabase) {
 // NAVIGATION
 // ========================================
 
-const navElement =
-  document.querySelector("#nav");
-
-if (navElement) {
-
-  navElement.innerHTML =
-    nav();
-
+const navElement = document.querySelector("#nav");
+if (navElement && !navElement.querySelector(".header")) {
+  navElement.innerHTML = nav("admin");
 }
+bootGlobalUI();
 
 
 // ========================================
@@ -209,6 +206,7 @@ const userTable =
 
 const paymentTable =
   document.querySelector("#paymentTable");
+const demandTable = document.querySelector("#demandTable");
 
 
 // ========================================
@@ -222,7 +220,8 @@ async function load() {
     const [
       usersResult,
       businessesResult,
-      paymentsResult
+      paymentsResult,
+      demandsResult
     ] = await Promise.all([
 
       supabase
@@ -257,7 +256,11 @@ async function load() {
           {
             ascending: false
           }
-        )
+        ),
+      supabase
+        .from("demands")
+        .select("*,profiles(first_name,last_name)")
+        .order("created_at", {ascending:false})
 
     ]);
 
@@ -300,6 +303,7 @@ async function load() {
 
     const payments =
       paymentsResult.data || [];
+    const demands = demandsResult.data || [];
 
     const bterm = (document.querySelector("#businessSearch")?.value || "").trim().toLowerCase();
     const uterm = (document.querySelector("#userSearch")?.value || "").trim().toLowerCase();
@@ -522,6 +526,7 @@ async function load() {
               <th>Phone</th>
               <th>Type</th>
               <th>Status</th>
+              <th>Demand access</th>
             </tr>
 
           </thead>
@@ -559,10 +564,9 @@ async function load() {
                     </td>
 
                     <td>
-                      ${esc(
-                        user.status || ""
-                      )}
+                      ${esc(user.status || "")}
                     </td>
+                    <td><button class="btn small ${user.can_post_demand?"success":"secondary"}" data-post-access="${user.user_id}">${user.can_post_demand?"Posting ON":"Grant posting"}</button> <button class="btn small ${user.can_respond_demand?"success":"secondary"}" data-response-access="${user.user_id}">${user.can_respond_demand?"Responses ON":"Grant responses"}</button></td>
 
                   </tr>
 
@@ -578,6 +582,17 @@ async function load() {
 
     }
 
+
+
+    if (demandTable) {
+      demandTable.innerHTML = `<table class="table"><thead><tr><th>Demand</th><th>User</th><th>Status</th><th>Action</th></tr></thead><tbody>${demands.map(d=>`<tr><td><b>${esc(d.title)}</b><br><small>${esc((d.description||'').slice(0,120))}</small></td><td>${esc(`${d.profiles?.first_name||''} ${d.profiles?.last_name||''}`.trim()||'User')}</td><td>${esc(d.status)}</td><td>${d.status==='pending'?`<button class="btn small success" data-demand-approve="${d.id}">Approve</button> <button class="btn small danger" data-demand-reject="${d.id}">Reject</button>`:''}${d.status==='approved'?`<button class="btn small secondary" data-demand-close="${d.id}">Close</button>`:''}</td></tr>`).join('')}</tbody></table>` || '<p>No demands.</p>';
+    }
+
+    document.querySelectorAll('[data-post-access]').forEach(btn=>btn.onclick=async()=>{const row=users.find(x=>x.user_id===btn.dataset.postAccess);if(!row)return;const r=await supabase.from('profiles').update({can_post_demand:!row.can_post_demand}).eq('user_id',row.user_id);toast(r.error?.message||'Posting access updated',!r.error);if(!r.error)load();});
+    document.querySelectorAll('[data-response-access]').forEach(btn=>btn.onclick=async()=>{const row=users.find(x=>x.user_id===btn.dataset.responseAccess);if(!row)return;const r=await supabase.from('profiles').update({can_respond_demand:!row.can_respond_demand}).eq('user_id',row.user_id);toast(r.error?.message||'Response access updated',!r.error);if(!r.error)load();});
+    document.querySelectorAll('[data-demand-approve]').forEach(btn=>btn.onclick=async()=>{const r=await supabase.from('demands').update({status:'approved'}).eq('id',btn.dataset.demandApprove);toast(r.error?.message||'Demand approved',!r.error);if(!r.error)load();});
+    document.querySelectorAll('[data-demand-reject]').forEach(btn=>btn.onclick=async()=>{const r=await supabase.from('demands').update({status:'rejected'}).eq('id',btn.dataset.demandReject);toast(r.error?.message||'Demand rejected',!r.error);if(!r.error)load();});
+    document.querySelectorAll('[data-demand-close]').forEach(btn=>btn.onclick=async()=>{const r=await supabase.from('demands').update({status:'closed'}).eq('id',btn.dataset.demandClose);toast(r.error?.message||'Demand closed',!r.error);if(!r.error)load();});
 
     // ====================================
     // PAYMENTS
@@ -955,7 +970,8 @@ document
         const tabs = [
           "businessTab",
           "usersTab",
-          "paymentsTab"
+          "paymentsTab",
+          "demandsTab"
         ];
 
 

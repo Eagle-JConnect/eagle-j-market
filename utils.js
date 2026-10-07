@@ -403,8 +403,10 @@ export function nav(active = "") {
         <a class="${active === "dashboard" ? "active" : ""}" href="dashboard.html">My Account</a>
         <button type="button" class="nav-action notification-trigger" id="notificationButton" aria-expanded="false" aria-controls="notificationPanel">🔔 <span data-label="Notifications">Notifications</span> <span id="notificationBadge" class="notification-badge" hidden>0</span></button>
         <label class="language-control"><span>🌐</span><select id="languageSelect" aria-label="Language"><option value="en">English</option><option value="fr">Français</option><option value="ht">Kreyòl</option></select></label>
+        <a class="nav-action" href="demands.html">📣 <span data-label="Demands">Demands</span></a>
         <a class="nav-action login-link" href="login.html">🔐 <span data-label="Login">Login</span></a>
         <button type="button" class="nav-action google-menu" id="googleMenuLogin">🟢 <span data-label="Continue with Google">Gmail / Google</span></button>
+        <button type="button" class="nav-action logout-menu" id="logoutMenuButton" hidden>🚪 <span data-label="Logout">Logout</span></button>
         <div class="notification-panel" id="notificationPanel" hidden>
           <div class="notification-head"><strong data-label="Notifications">Notifications</strong><button type="button" id="closeNotifications" aria-label="Close">×</button></div>
           <div id="notificationList" class="notification-list"><div class="notification-empty">Someone is connected</div></div>
@@ -445,7 +447,34 @@ export function bootGlobalUI(){
     });
   }
 
+  const loginLink=document.querySelector('.login-link');
   const googleButton=document.querySelector('#googleMenuLogin');
+  const logoutMenuButton=document.querySelector('#logoutMenuButton');
+  const syncAuthMenu=async()=>{
+    if(!supabase || !loginLink) return;
+    try{
+      const {data}=await supabase.auth.getUser();
+      const loggedIn=!!data?.user;
+      loginLink.hidden=loggedIn;
+      if(googleButton) googleButton.hidden=loggedIn;
+      if(logoutMenuButton) logoutMenuButton.hidden=!loggedIn;
+    }catch(e){ console.warn('Auth menu sync failed:',e); }
+  };
+  syncAuthMenu();
+  if(supabase && !document.documentElement.dataset.authMenuBound){
+    document.documentElement.dataset.authMenuBound='1';
+    supabase.auth.onAuthStateChange(()=>setTimeout(syncAuthMenu,0));
+  }
+  if(logoutMenuButton && !logoutMenuButton.dataset.bound){
+    logoutMenuButton.dataset.bound='1';
+    logoutMenuButton.addEventListener('click',async()=>{
+      logoutMenuButton.disabled=true;
+      const result=await logout();
+      if(result?.success){ location.href='index.html'; }
+      else { logoutMenuButton.disabled=false; toast(result?.error?.message||'Logout failed.'); }
+    });
+  }
+
   if(googleButton && !googleButton.dataset.bound){
     googleButton.dataset.bound='1';
     googleButton.addEventListener('click',async()=>{

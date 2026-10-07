@@ -12,6 +12,9 @@ A global local marketplace: **Find It • Promote It • Sell It**.
 - Favorites and reviews data model
 - Admin dashboard for users, businesses and payment requests
 - Free/Starter/Business/VIP plan request flow
+- Global demand system with Admin-controlled posting and response permissions
+- Demand moderation (pending/approved/rejected/closed)
+- Admin controls to grant/revoke demand posting and response access
 - Supabase RLS database schema
 - GitHub Pages flat-file deployment
 
@@ -21,6 +24,7 @@ A global local marketplace: **Find It • Promote It • Sell It**.
 3. If this is a fresh project, run `admin-bootstrap.sql` after creating your first account and replace the placeholder email with your admin email.
 4. Authentication → URL Configuration: set Site URL to your GitHub Pages URL, e.g. `https://eagle-jconnect.github.io/eagle-j-market/`.
 5. If email confirmation is enabled, users must confirm before login.
+6. After running the updated `schema.sql`, Admin can grant `can_post_demand` and `can_respond_demand` from the Admin Dashboard → Demands.
 
 ## GitHub setup
 Upload all files to the root of the `eagle-j-market` repository. GitHub Pages should use branch `main` and folder `/ (root)`.

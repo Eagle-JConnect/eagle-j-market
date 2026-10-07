@@ -18,7 +18,7 @@ const translations = {
     "Find It • Promote It • Sell It":"Find It • Promote It • Sell It","Find it. Promote it. Sell it.":"Find it. Promote it. Sell it.",
     "Someone is connected":"Someone is connected","Online":"Online","Language":"Language","English":"English","Français":"Français","Kreyòl":"Kreyòl",
     "Continue with Google":"Continue with Google","Gmail / Google":"Gmail / Google","Notifications":"Notifications","View notifications":"View notifications","No new notifications.":"No new notifications.","or":"or","No products found.":"No products found.","No businesses found.":"No businesses found.",
-    "No active deals right now.":"No active deals right now."
+    "No active deals right now.":"No active deals right now.","Demands":"Demands","Find what you need":"Find what you need","Post a demand":"Post a demand","Responses":"Responses","Admin approval required to post":"Admin approval required to post"
   },
   fr: {
     "Home":"Accueil","Businesses":"Entreprises","Products":"Produits","Deals":"Offres","Plans":"Forfaits","My Account":"Mon compte",
@@ -38,7 +38,7 @@ const translations = {
     "Find It • Promote It • Sell It":"Trouvez • Promouvez • Vendez","Someone is connected":"Quelqu'un est connecté","Online":"En ligne",
     "Language":"Langue","English":"Anglais","Français":"Français","Kreyòl":"Créole",
     "Continue with Google":"Continuer avec Google","Gmail / Google":"Gmail / Google","Notifications":"Notifications","View notifications":"Voir les notifications","No new notifications.":"Aucune nouvelle notification.","or":"ou","No products found.":"Aucun produit trouvé.","No businesses found.":"Aucune entreprise trouvée.",
-    "No active deals right now.":"Aucune offre active pour le moment."
+    "No active deals right now.":"Aucune offre active pour le moment.","Demands":"Demandes","Find what you need":"Trouvez ce dont vous avez besoin","Post a demand":"Publier une demande","Responses":"Réponses","Admin approval required to post":"Approbation admin requise pour publier"
   },
   ht: {
     "Home":"Akèy","Businesses":"Biznis","Products":"Pwodwi","Deals":"Òf","Plans":"Plan","My Account":"Kont mwen",
@@ -58,7 +58,7 @@ const translations = {
     "Find It • Promote It • Sell It":"Jwenn li • Pwomote li • Vann li","Someone is connected":"Gen yon moun ki konekte","Online":"Anliy",
     "Language":"Lang","English":"Anglè","Français":"Fransè","Kreyòl":"Kreyòl",
     "Continue with Google":"Kontinye ak Google","Gmail / Google":"Gmail / Google","Notifications":"Notifikasyon","View notifications":"Gade notifikasyon yo","No new notifications.":"Pa gen nouvo notifikasyon.","or":"oswa","No products found.":"Pa gen pwodwi jwenn.","No businesses found.":"Pa gen biznis jwenn.",
-    "No active deals right now.":"Pa gen òf aktif kounye a."
+    "No active deals right now.":"Pa gen òf aktif kounye a.","Demands":"Demand","Find what you need":"Jwenn sa ou bezwen","Post a demand":"Poste yon demand","Responses":"Repons","Admin approval required to post":"Apwobasyon administratè nesesè pou poste"
   }
 };
 

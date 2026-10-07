@@ -64,3 +64,70 @@ create policy market_images_user_delete on storage.objects
 for delete to authenticated
 using (bucket_id='market-images' and ((storage.foldername(name))[1] = auth.uid()::text or public.is_admin()));
 
+
+
+-- =========================================================
+-- DEMAND + RESPONSE ACCESS CONTROL
+-- =========================================================
+DO $$ BEGIN
+  ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS can_post_demand boolean NOT NULL DEFAULT false;
+  ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS can_respond_demand boolean NOT NULL DEFAULT false;
+EXCEPTION WHEN duplicate_column THEN NULL; END $$;
+
+create table if not exists public.demands(
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text not null,
+  description text not null,
+  category_id uuid references public.categories(id),
+  location text,
+  country text,
+  budget numeric(12,2),
+  currency text not null default 'USD',
+  status text not null default 'pending' check(status in('pending','approved','rejected','closed','removed')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.demand_responses(
+  id uuid primary key default gen_random_uuid(),
+  demand_id uuid not null references public.demands(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  message text not null,
+  status text not null default 'published' check(status in('published','hidden','removed')),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists demands_status_idx on public.demands(status);
+create index if not exists demands_user_idx on public.demands(user_id);
+create index if not exists demand_responses_demand_idx on public.demand_responses(demand_id);
+
+DROP TRIGGER IF EXISTS demands_updated_at ON public.demands;
+CREATE TRIGGER demands_updated_at BEFORE UPDATE ON public.demands FOR EACH ROW EXECUTE PROCEDURE public.set_updated_at();
+
+ALTER TABLE public.demands ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.demand_responses ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS demands_read ON public.demands;
+CREATE POLICY demands_read ON public.demands FOR SELECT USING(status='approved' OR user_id=auth.uid() OR public.is_admin());
+DROP POLICY IF EXISTS demands_insert ON public.demands;
+CREATE POLICY demands_insert ON public.demands FOR INSERT WITH CHECK(user_id=auth.uid() AND EXISTS(SELECT 1 FROM public.profiles p WHERE p.user_id=auth.uid() AND p.status='active' AND p.can_post_demand=true));
+DROP POLICY IF EXISTS demands_update ON public.demands;
+CREATE POLICY demands_update ON public.demands FOR UPDATE USING(user_id=auth.uid() OR public.is_admin()) WITH CHECK(user_id=auth.uid() OR public.is_admin());
+DROP POLICY IF EXISTS demands_delete ON public.demands;
+CREATE POLICY demands_delete ON public.demands FOR DELETE USING(user_id=auth.uid() OR public.is_admin());
+
+DROP POLICY IF EXISTS demand_responses_read ON public.demand_responses;
+CREATE POLICY demand_responses_read ON public.demand_responses FOR SELECT USING(
+  user_id=auth.uid() OR public.is_admin() OR EXISTS(SELECT 1 FROM public.demands d WHERE d.id=demand_id AND d.status='approved')
+);
+DROP POLICY IF EXISTS demand_responses_insert ON public.demand_responses;
+CREATE POLICY demand_responses_insert ON public.demand_responses FOR INSERT WITH CHECK(
+  user_id=auth.uid()
+  AND EXISTS(SELECT 1 FROM public.profiles p WHERE p.user_id=auth.uid() AND p.status='active' AND p.can_respond_demand=true)
+  AND EXISTS(SELECT 1 FROM public.demands d WHERE d.id=demand_id AND d.status='approved')
+);
+DROP POLICY IF EXISTS demand_responses_update ON public.demand_responses;
+CREATE POLICY demand_responses_update ON public.demand_responses FOR UPDATE USING(user_id=auth.uid() OR public.is_admin()) WITH CHECK(user_id=auth.uid() OR public.is_admin());
+DROP POLICY IF EXISTS demand_responses_delete ON public.demand_responses;
+CREATE POLICY demand_responses_delete ON public.demand_responses FOR DELETE USING(user_id=auth.uid() OR public.is_admin());

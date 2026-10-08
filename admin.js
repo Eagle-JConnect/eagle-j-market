@@ -259,7 +259,7 @@ async function load() {
         ),
       supabase
         .from("demands")
-        .select("*,profiles(first_name,last_name)")
+        .select("*")
         .order("created_at", {ascending:false})
 
     ]);
@@ -303,7 +303,10 @@ async function load() {
 
     const payments =
       paymentsResult.data || [];
-    const demands = demandsResult.data || [];
+    const demands = (demandsResult.data || []).map(demand => ({
+      ...demand,
+      profiles: users.find(user => user.user_id === demand.user_id) || null
+    }));
 
     const bterm = (document.querySelector("#businessSearch")?.value || "").trim().toLowerCase();
     const uterm = (document.querySelector("#userSearch")?.value || "").trim().toLowerCase();
@@ -976,18 +979,13 @@ document
 
 
         tabs.forEach(id => {
-
-          const section =
-            document.getElementById(id);
-
-          if (section) {
-
-            section.classList.add(
-              "hidden"
-            );
-
-          }
-
+          const section = document.getElementById(id);
+          if (section) section.classList.add("hidden");
+        });
+        document.querySelectorAll(".admin-nav button[data-tab]").forEach(tabButton => {
+          const active = tabButton === button;
+          tabButton.setAttribute("aria-selected", String(active));
+          tabButton.classList.toggle("secondary", !active);
         });
 
 

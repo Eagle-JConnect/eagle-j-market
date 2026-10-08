@@ -1,63 +1,30 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <title>EAGLE-J MARKET — Admin Dashboard</title>
-  <link rel="stylesheet" href="./style.css?v=final-2026">
-  <link rel="stylesheet" href="./admin.css?v=admin-final-1">
-</head>
-<body class="admin-page">
-  <div id="nav"></div>
-  <main class="page admin-main">
-    <section class="admin-header panel">
-      <div>
-        <span class="eyebrow">EAGLE-J MARKET · CONTROL CENTER</span>
-        <h1>Admin Dashboard</h1>
-        <p class="muted">Review businesses, manage users, moderate demands and track payments.</p>
-      </div>
-      <button id="logout" class="btn danger" type="button">Log out</button>
-    </section>
-
-    <section class="stats admin-stats" aria-label="Marketplace summary">
-      <div class="stat"><b id="users">0</b><span>Total users</span></div>
-      <div class="stat"><b id="pending">0</b><span>Pending businesses</span></div>
-      <div class="stat"><b id="businesses">0</b><span>Total businesses</span></div>
-      <div class="stat"><b id="payments">0</b><span>Pending payments</span></div>
-    </section>
-
-    <section class="panel admin-tabs-panel">
-      <div class="admin-nav" role="tablist" aria-label="Admin sections">
-        <button type="button" class="btn" data-tab="businessTab" role="tab" aria-selected="true">Businesses</button>
-        <button type="button" class="btn secondary" data-tab="usersTab" role="tab" aria-selected="false">Users</button>
-        <button type="button" class="btn secondary" data-tab="paymentsTab" role="tab" aria-selected="false">Payments</button>
-        <button type="button" class="btn secondary" data-tab="demandsTab" role="tab" aria-selected="false">Demands</button>
-      </div>
-      <p class="admin-security-note">Admin access is checked against your authenticated Supabase profile. Keep your admin account private.</p>
-    </section>
-
-    <section id="businessTab" class="panel admin-section" role="tabpanel">
-      <div class="admin-section-head"><div><h2>Businesses</h2><p class="muted">Approve or reject submissions and feature approved businesses.</p></div><input id="businessSearch" type="search" placeholder="Search businesses…" aria-label="Search businesses"></div>
-      <div id="businessTable" class="admin-table-wrap" aria-live="polite">Loading businesses…</div>
-    </section>
-
-    <section id="usersTab" class="panel admin-section hidden" role="tabpanel">
-      <div class="admin-section-head"><div><h2>Users</h2><p class="muted">Review accounts and manage demand permissions.</p></div><input id="userSearch" type="search" placeholder="Search users…" aria-label="Search users"></div>
-      <div id="userTable" class="admin-table-wrap" aria-live="polite">Loading users…</div>
-    </section>
-
-    <section id="paymentsTab" class="panel admin-section hidden" role="tabpanel">
-      <div class="admin-section-head"><div><h2>Payments</h2><p class="muted">Review payment records. Only mark a payment as paid after verifying it.</p></div></div>
-      <div id="paymentTable" class="admin-table-wrap" aria-live="polite">Loading payments…</div>
-    </section>
-
-    <section id="demandsTab" class="panel admin-section hidden" role="tabpanel">
-      <div class="admin-section-head"><div><h2>Demands moderation</h2><p class="muted">Approve, reject or close marketplace demand posts.</p></div></div>
-      <div id="demandTable" class="admin-table-wrap" aria-live="polite">Loading demands…</div>
-    </section>
-  </main>
-  <script type="module" src="./global-ui.js?v=final-2026"></script>
-  <script type="module" src="./admin.js?v=admin-final-1"></script>
-</body>
-</html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EAGLE-J MARKET — Admin Dashboard</title><link rel="stylesheet" href="./style.css?v=premium-2026-10"></head>
+<body>
+<div id="nav"></div>
+<main class="page">
+  <section class="admin-header panel" style="padding:24px;display:flex;justify-content:space-between;gap:16px;align-items:center">
+    <div><span class="eyebrow">CONTROL CENTER</span><h1>Admin Dashboard</h1><p class="muted">Manage users, businesses, products and payments.</p></div>
+    <button id="logout" class="btn danger">Logout</button>
+  </section>
+  <section class="stats" style="margin-top:18px">
+    <div class="stat"><b id="users">0</b><span>Users</span></div>
+    <div class="stat"><b id="pending">0</b><span>Pending Businesses</span></div>
+    <div class="stat"><b id="businesses">0</b><span>Total Businesses</span></div>
+    <div class="stat"><b id="payments">0</b><span>Pending Payments</span></div>
+  </section>
+  <section class="panel" style="padding:18px;margin-top:18px">
+    <div class="admin-nav" style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" class="btn" data-tab="businessTab">Businesses</button>
+      <button type="button" class="btn secondary" data-tab="usersTab">Users</button>
+      <button type="button" class="btn secondary" data-tab="paymentsTab">Payments</button><button type="button" class="btn secondary" data-tab="demandsTab">Demands</button>
+    </div>
+  </section>
+  <section id="businessTab" class="panel" style="padding:20px;margin-top:18px"><h2>Businesses</h2><input id="businessSearch" placeholder="Search businesses..." style="max-width:420px"><div id="businessTable">Loading...</div></section>
+  <section id="usersTab" class="panel hidden" style="padding:20px;margin-top:18px"><h2>Users</h2><input id="userSearch" placeholder="Search users..." style="max-width:420px"><div id="userTable">Loading...</div></section>
+  <section id="paymentsTab" class="panel hidden" style="padding:20px;margin-top:18px"><h2>Payments</h2><div id="paymentTable">Loading...</div></section>
+  <section id="demandsTab" class="panel hidden" style="padding:20px;margin-top:18px"><h2>Demand access & moderation</h2><p class="muted">Grant users permission to post demands or respond to approved demands.</p><div id="demandTable">Loading...</div></section>
+</main>
+<script type="module" src="global-ui.js?v=final-2026"></script><script type="module" src="./admin.js"></script>
+</body></html>
